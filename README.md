@@ -14,6 +14,7 @@ This repository contains the infrastructure setup for running a **Spring Boot-ba
 ```
 telegram-bot-server-infra/
 ├── docker-compose.yml        # Core infrastructure
+├── bootstrap.sh              # Bootstrap script for initial server setup
 ├── .env                      # Environment variables (secrets)
 ├── deploy.log                # Deployment logs (auto-generated)
 ├── nginx/                    # Nginx configuration with SSL
@@ -26,13 +27,40 @@ telegram-bot-server-infra/
 
 ## 🚀 What This Infra Does
 
-| Component   | Description |
-|-------------|-------------|
-| **Nginx**   | SSL termination, proxying GitHub Webhook to `webhook-listener` |
+| Component         | Description |
+|-------------------|-------------|
+| **Nginx**         | SSL termination, proxying GitHub Webhook to `webhook-listener` |
 | **Webhook Listener** | Lightweight Node.js server that listens to GitHub pushes and triggers redeploy |
-| **Telegram Bot** | Pulled as Docker image (`dladutsko/telegram-bot:latest`) and managed via `docker-compose` |
-| **SSL**     | Managed via Let's Encrypt with auto-renew |
-| **Deploy**  | Triggered automatically via GitHub webhook after successful push to `main` branch |
+| **Telegram Bot**  | Pulled as Docker image (`dladutsko/telegram-bot:latest`) and managed via `docker-compose` |
+| **SSL**           | Managed via Let's Encrypt with auto-renew |
+| **Deploy**        | Triggered automatically via GitHub webhook after successful push to `main` branch |
+| **Bootstrap**     | Script for initial server setup, including Docker and dependencies installation |
+
+---
+
+## 🔧 Initial VPS Setup (bootstrap.sh)
+This repository includes a helper script `bootstrap.sh` that prepares your VPS for deployment. It installs all necessary dependencies, creates a deploy user, and sets up the folder structure.
+### 📋 What bootstrap.sh does:
+- Updates the system (`apt update && upgrade`)
+- Installs Docker and Docker Compose (if not already installed)
+- Creates a user named `deploy` (if it doesn’t exist)
+- Adds the `deploy` user to the `sudo` and `docker` groups
+- Copies the `root` user’s SSH key to the new user
+- Creates the working folder `/home/deploy/app`
+- (Optional) Disables root login via SSH for extra security
+
+### ▶️ How to use:
+Log in to your server as root, clone this repo or copy `bootstrap.sh` file, and run:
+```bash
+chmod +x bootstrap.sh
+./bootstrap.sh
+```
+
+💡 At the end of the script, you’ll be asked if you want to disable root SSH access. If you say “yes”, make sure you can log in as deploy via SSH first.
+
+---
+
+📌 Tip: It’s best to run bootstrap.sh only once when setting up a fresh VPS. Running it again is safe — the script checks whether Docker and the deploy user already exist and skips their creation if so.
 
 ---
 
