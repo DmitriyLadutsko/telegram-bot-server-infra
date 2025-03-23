@@ -1,0 +1,48 @@
+services:
+  bot:
+    build: .
+    container_name: telegram-bot
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+          cpus: "0.5"
+    networks:
+      - botnet
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./certs:/etc/letsencrypt
+      - ./logs:/var/log/nginx
+    depends_on:
+      - bot
+      - webhook
+    networks:
+      - botnet
+  
+  webhook:
+    build: ./github-webhook
+    container_name: github-webhook-listener
+    restart: unless-stopped
+    environment:
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/deploy/app:/app
+    working_dir: /app
+    networks:
+      - botnet
+
+networks:
+  botnet:
+    driver: bridge
