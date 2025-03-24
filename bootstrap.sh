@@ -88,6 +88,59 @@ else
   echo "✅ Папка /home/deploy/app уже существует"
 fi
 
+read -p -r "❓ Установить и активировать GitHub webhook listener сейчас? (y/N): " setup_webhook
+if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
+  # Установка webhook, если не установлен
+  if ! command -v webhook >/dev/null 2>&1; then
+    echo "📡 Устанавливаем webhook..."
+    apt install -y webhook
+  else
+    echo "✅ webhook уже установлен"
+  fi
+
+  # 📁 Пути
+  APP_DIR="/home/deploy/app"
+  HOOKS_DIR="$APP_DIR/webhook"
+  LOG_DIR="$APP_DIR/logs"
+
+  mkdir -p "$LOG_DIR"
+  chown -R deploy:deploy "$LOG_DIR"
+
+  # 🔐 Секрет
+  read -p "🔐 Введи GitHub webhook секрет: " input_secret
+  export WEBHOOK_SECRET="$input_secret"
+
+  echo "🛠 Генерируем hooks.json из шаблона..."
+  su - deploy -c "envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
+
+  # systemd unit
+  echo "📦 Создаём systemd unit для webhook..."
+  cat <<EOF | tee /etc/systemd/system/webhook.service > /dev/null
+[Unit]
+Description=Webhook Listener
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+WorkingDirectory=$HOOKS_DIR
+ExecStart=/usr/bin/webhook -hooks $HOOKS_DIR/hooks.json -port 9000 -verbose
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reexec
+  systemctl daemon-reload
+  systemctl enable webhook
+  systemctl restart webhook
+
+  echo "✅ Webhook listener настроен и запущен!"
+else
+  echo "⚠️ Установка webhook отложена. Ты можешь запустить setup позже вручную."
+fi
+
 # Отключить root-доступ (опционально)
 read -p "❓ Отключить root-доступ по SSH? (y/N): " disable_root
 if [[ "$disable_root" =~ ^[Yy]$ ]]; then
