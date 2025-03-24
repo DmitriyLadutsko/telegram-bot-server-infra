@@ -24,10 +24,12 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./VERSION:/etc/nginx/VERSION:ro
+      - ./status.json:/etc/nginx/status.json:ro
+      - ./logs/deploy.log:/var/log/nginx/deploy.log:ro
       - ./logs:/var/log/nginx
-    depends_on:
+#    depends_on:
 #      - bot
-      - webhook-listener
     networks:
       - botnet
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Bot Status</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 2em; text-align: center; }
+        h1 { color: #58a6ff; }
+        .ok { color: #3fb950; }
+        .fail { color: #f85149; }
+        .footer { margin-top: 2em; font-size: 0.9em; color: #8b949e; }
+        a { color: #58a6ff; text-decoration: none; }
+        code { background: #21262d; padding: 0.2em 0.4em; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<h1>🤖 Telegram Bot is Alive</h1>
+<p id="status">Checking status...</p>
+<p>Version: <span id="version">loading...</span></p>
+<p>Uptime: <span id="uptime">loading...</span></p>
+<p>Last deploy: <span id="deploy">loading...</span></p>
+<p><a href="https://github.com/ladutsko/demo-bot-tlgrm/releases" target="_blank">View Latest Release</a></p>
+<div class="footer">Updated via GitHub Webhook | Hosted on <code>dladutsko.ru</code></div>
+
+<script>
+    // Healthcheck
+    fetch("http://localhost:8080/actuator/health")
+        .then(res => res.json())
+        .then(data => {
+            const status = data.status === "UP" ? "✅ <span class='ok'>UP</span>" : "❌ <span class='fail'>" + data.status + "</span>";
+            document.getElementById("status").innerHTML = "Status: " + status;
+        })
+        .catch(() => document.getElementById("status").innerHTML = "Status: ❌ <span class='fail'>UNREACHABLE</span>");
+
+    // Версия из файла
+    fetch("/version")
+        .then(res => res.text())
+        .then(text => document.getElementById("version").textContent = text.trim());
+
+    // Аптайм из status.json
+    fetch("/status.json")
+        .then(res => res.json())
+        .then(data => document.getElementById("uptime").textContent = data.uptime || "—");
+
+    // Последний деплой из deploy.log
+    fetch("/deploy.log")
+        .then(res => res.text())
+        .then(text => {
+            const lastLine = text.trim().split('\n').reverse().find(l => l.includes("Deploy successful"));
+            document.getElementById("deploy").textContent = lastLine ? lastLine.split("]")[0].replace("[", "") : "—";
+        });
+</script>
+</body>
+</html>

@@ -11,3 +11,5 @@ if [ $? -eq 0 ]; then
 else
   echo "[$(date)] ❌ Deploy failed" >> $LOG_FILE
 fi
+
+echo "{\"uptime\": \"$(uptime -p)\"}" > /home/deploy/app/status.json
