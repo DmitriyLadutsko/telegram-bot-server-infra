@@ -1,3 +1,5 @@
 .env
 deploy.log
 /webhook/node_modules/
+/logs/
+/certs/
