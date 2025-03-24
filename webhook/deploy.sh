@@ -12,4 +12,5 @@ else
   echo "[$(date)] ❌ Deploy failed" >> $LOG_FILE
 fi
 
+docker cp telegram-bot:/app/VERSION /home/deploy/app/VERSION
 echo "{\"uptime\": \"$(uptime -p)\"}" > /home/deploy/app/status.json
