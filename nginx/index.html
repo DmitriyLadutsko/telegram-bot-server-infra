@@ -24,7 +24,7 @@
 
 <script>
     // Healthcheck
-    fetch("/health")
+    fetch("https://dladutsko.ru/health")
         .then(res => res.json())
         .then(data => {
             const status = data.status === "UP" ? "✅ <span class='ok'>UP</span>" : "❌ <span class='fail'>" + data.status + "</span>";
