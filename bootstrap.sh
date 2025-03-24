@@ -88,7 +88,7 @@ else
   echo "✅ Папка /home/deploy/app уже существует"
 fi
 
-read -p -r "❓ Установить и активировать GitHub webhook listener сейчас? (y/N): " setup_webhook
+read -r -p "❓ Установить и активировать GitHub webhook listener сейчас? (y/N): " setup_webhook
 if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   # Установка webhook, если не установлен
   if ! command -v webhook >/dev/null 2>&1; then
@@ -107,7 +107,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   chown -R deploy:deploy "$LOG_DIR"
 
   # 🔐 Секрет
-  read -p "🔐 Введи GitHub webhook секрет: " input_secret
+  read -r -p "🔐 Введи GitHub webhook секрет: " input_secret
   export WEBHOOK_SECRET="$input_secret"
 
   echo "🛠 Генерируем hooks.json из шаблона..."
@@ -142,7 +142,7 @@ else
 fi
 
 # Отключить root-доступ (опционально)
-read -p "❓ Отключить root-доступ по SSH? (y/N): " disable_root
+read -r -p "❓ Отключить root-доступ по SSH? (y/N): " disable_root
 if [[ "$disable_root" =~ ^[Yy]$ ]]; then
   sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
   systemctl restart ssh
