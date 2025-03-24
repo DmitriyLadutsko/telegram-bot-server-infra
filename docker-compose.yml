@@ -1,6 +1,6 @@
 services:
   bot:
-    image: dladutsko/telegram-bot:latest
+    image: ladut/telegram-bot:latest
     container_name: telegram-bot
     restart: unless-stopped
     environment:
