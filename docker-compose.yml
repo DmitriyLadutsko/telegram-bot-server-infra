@@ -30,19 +30,6 @@ services:
       - webhook-listener
     networks:
       - botnet
-  
-  webhook-listener:
-    build: ./webhook
-    container_name: github-webhook-listener
-    restart: unless-stopped
-    environment:
-      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/deploy/app:/app
-    working_dir: /app
-    networks:
-      - botnet
 
 networks:
   botnet:

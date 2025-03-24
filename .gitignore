@@ -1,5 +1,8 @@
+/.idea/
 .env
 deploy.log
-/webhook/node_modules/
 /logs/
 /certs/
+/webhook/node_modules/
+/webhook/logs/
+/webhook/hooks.json
