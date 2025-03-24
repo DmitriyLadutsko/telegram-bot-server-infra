@@ -23,11 +23,11 @@ services:
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - ./certs:/etc/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./logs:/var/log/nginx
     depends_on:
-      - bot
-      - webhook
+#      - bot
+      - webhook-listener
     networks:
       - botnet
   
