@@ -24,18 +24,20 @@ app.post("/github-webhook", (req, res) => {
   }
 
   const event = req.headers["x-github-event"];
-  if (event !== "push") {
+  if (event !== "release") {
     log(`📦 Ignored event: ${event}`);
     return res.status(200).send("Ignored");
   }
 
-  const ref = req.body.ref;
-  if (ref !== "refs/heads/main") {
-    log(`🔁 Ignoring push to non-main branch (${ref})`);
+  if (req.body.action !== "published") {
+    log(`🔕 Release event ignored (action = ${req.body.action})`);
     return res.status(200).send("Ignored");
   }
 
-  log("🚀 Valid push to main detected. Deploying...");
+  const releaseName = req.body.release.name || "Unnamed release";
+  const tag = req.body.release.tag_name;
+
+  log(`🚀 Published release: ${releaseName} [${tag}]. Starting deploy...`);
 
   exec("docker-compose pull bot && docker-compose up -d bot", (err, stdout, stderr) => {
     if (err) {
@@ -43,8 +45,8 @@ app.post("/github-webhook", (req, res) => {
       return res.status(500).send("Deploy failed");
     }
 
-    log(`✅ Deploy success:\n${stdout}`);
-    res.status(200).send("Deploy triggered");
+    log(`✅ Deploy succeeded:\n${stdout}`);
+    res.status(200).send("Deploy complete");
   });
 });
 
@@ -63,5 +65,5 @@ function log(message) {
 }
 
 app.listen(PORT, () => {
-  console.log(`📡 Webhook server listening on port ${PORT}`);
+  console.log(`📡 Webhook listener is running on port ${PORT}`);
 });
