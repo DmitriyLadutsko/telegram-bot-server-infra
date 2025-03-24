@@ -1,5 +1,5 @@
 /.idea/
-/.env
+.env
 deploy.log
 /logs/
 /certs/
