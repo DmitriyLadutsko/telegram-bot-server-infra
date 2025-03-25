@@ -18,8 +18,8 @@
         },
         {
           "match": {
-            "type": "regex",
-            "regex": "released",
+            "type": "value",
+            "value": "released",
             "parameter": {
               "source": "payload",
               "name": "action"
