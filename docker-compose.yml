@@ -5,12 +5,6 @@ services:
     restart: unless-stopped
     environment:
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -s http://localhost:8080/actuator/health | grep '\"status\":\"UP\"'" ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
     networks:
       - botnet
 
