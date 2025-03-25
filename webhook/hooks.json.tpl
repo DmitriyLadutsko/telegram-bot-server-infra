@@ -29,7 +29,11 @@
         {
           "match": {
             "type": "payload-hash-sha256",
-            "secret": "${WEBHOOK_SECRET}"
+            "secret": "${WEBHOOK_SECRET}",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
           }
         }
       ]
