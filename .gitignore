@@ -9,3 +9,5 @@ deploy.log
 
 status.json
 VERSION
+
+**/.DS_Store
