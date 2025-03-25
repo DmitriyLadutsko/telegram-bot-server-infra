@@ -2,15 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>Telegram Bot Status</title>
     <style>
-        body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 2em; text-align: center; }
-        h1 { color: #58a6ff; }
-        .ok { color: #3fb950; }
-        .fail { color: #f85149; }
-        .footer { margin-top: 2em; font-size: 0.9em; color: #8b949e; }
-        a { color: #58a6ff; text-decoration: none; }
-        code { background: #21262d; padding: 0.2em 0.4em; border-radius: 4px; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 2em;
+            text-align: center;
+            margin: 0;
+        }
+
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+        }
+
+        p {
+            margin: 0.5em 0;
+            font-size: 1.1em;
+        }
+
+        .ok {
+            color: #3fb950;
+        }
+
+        .fail {
+            color: #f85149;
+        }
+
+        .footer {
+            margin-top: 2em;
+            font-size: 0.9em;
+            color: #8b949e;
+        }
+
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        code {
+            background: #21262d;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 0.4em;
+            border-radius: 50%;
+            background-color: #3fb950;
+            animation: pulse 1.5s infinite ease-in-out;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.6);
+                opacity: 0.3;
+            }
+        }
+
+        /* 📱 Responsive tweaks */
+        @media (max-width: 600px) {
+            body {
+                padding: 1em;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            .footer {
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -24,30 +103,32 @@
 
 <script>
     // Healthcheck
-    fetch("/health")
+    fetch('/health')
         .then(res => res.json())
         .then(data => {
-            const status = data.status === "UP" ? "✅ <span class='ok'>UP</span>" : "❌ <span class='fail'>" + data.status + "</span>";
-            document.getElementById("status").innerHTML = "Status: " + status;
+            const status = data.status === "UP"
+                ? "<span class='status-dot'></span><span class='ok'>UP</span>"
+                : "❌ <span class='fail'>" + data.status + "</span>";
+            document.getElementById('status').innerHTML = 'Status: ' + status;
         })
-        .catch(() => document.getElementById("status").innerHTML = "Status: ❌ <span class='fail'>UNREACHABLE</span>");
+        .catch(() => document.getElementById('status').innerHTML = 'Status: ❌ <span class=\'fail\'>UNREACHABLE</span>');
 
     // Версия из файла
-    fetch("/version")
+    fetch('/version')
         .then(res => res.text())
-        .then(text => document.getElementById("version").textContent = text.trim());
+        .then(text => document.getElementById('version').textContent = text.trim());
 
     // Аптайм из status.json
-    fetch("/status.json")
+    fetch('/status.json')
         .then(res => res.json())
-        .then(data => document.getElementById("uptime").textContent = data.uptime || "—");
+        .then(data => document.getElementById('uptime').textContent = data.uptime || '—');
 
     // Последний деплой из deploy.log
-    fetch("/deploy.log")
+    fetch('/deploy.log')
         .then(res => res.text())
         .then(text => {
-            const lastLine = text.trim().split('\n').reverse().find(l => l.includes("Deploy successful"));
-            document.getElementById("deploy").textContent = lastLine ? lastLine.split("]")[0].replace("[", "") : "—";
+            const lastLine = text.trim().split('\n').reverse().find(l => l.includes('Deploy successful'));
+            document.getElementById('deploy').textContent = lastLine ? lastLine.split(']')[0].replace('[', '') : '—';
         });
 </script>
 </body>
