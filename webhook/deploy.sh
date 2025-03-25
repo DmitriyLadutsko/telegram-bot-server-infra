@@ -5,6 +5,8 @@ echo "[$(date)] 🚀 Starting deploy..." >> $LOG_FILE
 
 docker-compose -f /home/deploy/app/docker-compose.yml pull bot >> $LOG_FILE 2>&1
 docker-compose -f /home/deploy/app/docker-compose.yml up -d bot >> $LOG_FILE 2>&1
+docker cp telegram-bot:/app/VERSION /home/deploy/app/VERSION >> $LOG_FILE 2>&1
+docker restart nginx-proxy >> $LOG_FILE 2>&1
 
 if [ $? -eq 0 ]; then
   echo "[$(date)] ✅ Deploy successful" >> $LOG_FILE
@@ -12,5 +14,4 @@ else
   echo "[$(date)] ❌ Deploy failed" >> $LOG_FILE
 fi
 
-docker cp telegram-bot:/app/VERSION /home/deploy/app/VERSION
 echo "{\"uptime\": \"$(uptime -p)\"}" > /home/deploy/app/status.json
