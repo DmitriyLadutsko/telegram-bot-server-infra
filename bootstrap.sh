@@ -111,7 +111,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   export WEBHOOK_SECRET="$input_secret"
 
   echo "🛠 Генерируем hooks.json из шаблона..."
-  su - deploy -c "envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
+  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
 
   # systemd unit
   echo "📦 Создаём systemd unit для webhook..."
