@@ -19,7 +19,7 @@
         {
           "match": {
             "type": "value",
-            "value": "released",
+            "value": "published",
             "parameter": {
               "source": "payload",
               "name": "action"
