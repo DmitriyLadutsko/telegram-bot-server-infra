@@ -17,6 +17,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./nginx/static:/usr/share/nginx/html:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./VERSION:/etc/nginx/VERSION:ro
       - ./status.json:/etc/nginx/status.json:ro

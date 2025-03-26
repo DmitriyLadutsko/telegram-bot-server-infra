@@ -2,7 +2,7 @@
 
 # 📁 Путь до директории с nginx конфигами
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_FILE="$SCRIPT_DIR/github-ips.conf"
+TARGET_FILE="$SCRIPT_DIR/github-ips"
 
 # 📦 Получаем IP-диапазоны из GitHub API
 echo "📡 Получение IP-адресов GitHub Webhook..."
