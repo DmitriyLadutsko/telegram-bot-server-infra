@@ -28,7 +28,7 @@
         },
         {
           "match": {
-            "type": "payload-hash-sha256",
+            "type": "payload-hmac-sha256",
             "secret": "${WEBHOOK_SECRET}",
             "parameter": {
               "source": "header",
