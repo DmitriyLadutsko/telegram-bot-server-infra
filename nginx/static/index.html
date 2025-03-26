@@ -119,12 +119,12 @@
         .then(text => document.getElementById('version').textContent = text.trim());
 
     // Аптайм из status.json
-    fetch('/status.json')
+    fetch('/status')
         .then(res => res.json())
         .then(data => document.getElementById('uptime').textContent = data.uptime || '—');
 
     // Последний деплой из deploy.log
-    fetch('/deploy.log')
+    fetch('/deploy')
         .then(res => res.text())
         .then(text => {
             const lastLine = text.trim().split('\n').reverse().find(l => l.includes('Deploy successful'));
