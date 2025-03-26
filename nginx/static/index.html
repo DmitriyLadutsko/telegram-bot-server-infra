@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
     <title>Telegram Bot Status</title>
     <style>
         body {
@@ -13,6 +13,11 @@
             padding: 2em;
             text-align: center;
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
         }
 
         h1 {
@@ -23,6 +28,11 @@
         p {
             margin: 0.5em 0;
             font-size: 1.1em;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
         }
 
         .ok {
@@ -93,22 +103,24 @@
     </style>
 </head>
 <body>
-<h1>🤖 Telegram Bot is Alive</h1>
-<p id="status">Checking status...</p>
-<p>Version: <span id="version">loading...</span></p>
-<p>Uptime: <span id="uptime">loading...</span></p>
-<p>Last deploy: <span id="deploy">loading...</span></p>
-<p><a href="https://github.com/DmitriyLadutsko/demo-bot/releases" target="_blank">View Latest Release</a></p>
-<div class="footer">Updated via GitHub Webhook | Hosted on <code>dladutsko.ru</code></div>
+<div class="container">
+    <h1>🤖 Telegram Bot is Alive</h1>
+    <p id="status">Checking status...</p>
+    <p>Version: <span id="version">loading...</span></p>
+    <p>Uptime: <span id="uptime">loading...</span></p>
+    <p>Last deploy: <span id="deploy">loading...</span></p>
+    <p><a href="https://github.com/DmitriyLadutsko/demo-bot/releases" target="_blank">View Latest Release</a></p>
+    <div class="footer">Updated via GitHub Webhook | Hosted on <code>dladutsko.ru</code></div>
+</div>
 
 <script>
     // Healthcheck
     fetch('/health')
         .then(res => res.json())
         .then(data => {
-            const status = data.status === "UP"
-                ? "<span class='status-dot'></span><span class='ok'>UP</span>"
-                : "❌ <span class='fail'>" + data.status + "</span>";
+            const status = data.status === 'UP'
+                ? '<span class=\'status-dot\'></span><span class=\'ok\'>UP</span>'
+                : '❌ <span class=\'fail\'>' + data.status + '</span>';
             document.getElementById('status').innerHTML = 'Status: ' + status;
         })
         .catch(() => document.getElementById('status').innerHTML = 'Status: ❌ <span class=\'fail\'>UNREACHABLE</span>');
