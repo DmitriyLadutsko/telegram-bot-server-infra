@@ -1,16 +1,42 @@
-#!/bin/bash
-
-# Скрипт для настройки окружения на сервере
-# - Устанавливает Docker и Docker Compose
-# - Создаёт пользователя deploy и добавляет его в группы sudo и docker
-# - Копирует SSH-ключи от root для пользователя deploy
-# - Создаёт рабочую папку /home/deploy/app
-# - Отключает root-доступ по SSH (опционально)
-
-# chmod +x bootstrap.sh
-# ./bootstrap.sh
-
 set -e
+
+APP_DIR="/home/deploy/app"
+ENV_FILE="$APP_DIR/.env"
+
+# 📝 Ввод конфигурации
+if [ ! -f "$ENV_FILE" ]; then
+  echo
+  echo "📝 Для полной настройки потребуется ввести:"
+  echo "   • Docker Hub username"
+  echo "   • Имя Docker-образа Telegram-бота"
+  echo "   • GitHub Webhook Secret"
+  echo "   • (опционально) Telegram Bot Token"
+  echo
+  echo "✅ Рекомендуется ввести всё сразу, чтобы авто-деплой работал без ручной донастройки."
+  echo
+
+  read -r -p "❓ Готов ввести все данные сейчас? (Y/n): " ready_now
+  if [[ "$ready_now" =~ ^[Nn]$ ]]; then
+    echo
+    echo "⚠️  Установка будет продолжена *без конфигурации .env и запуска webhook.service*."
+    echo "   Ты сможешь вручную:"
+    echo "     • создать файл /home/deploy/app/.env"
+    echo "     • сгенерировать webhook/hooks.json"
+    echo "     • и запустить сервис webhook вручную"
+    echo
+    echo "ℹ️  Или можешь перезапустить bootstrap.sh позже, когда будешь готов."
+    echo
+
+    read -r -p "❌ Прервать установку сейчас, чтобы собрать все данные? (y/N): " abort_now
+    if [[ "$abort_now" =~ ^[Yy]$ ]]; then
+      echo "🚪 Выход. Повтори запуск bootstrap.sh позже."
+      exit 0
+    else
+      echo "➡️ Продолжаем без настройки авто-деплоя."
+      SKIP_ENV_SETUP=true
+    fi
+  fi
+fi
 
 echo "🔄 Обновляем систему..."
 apt update && apt upgrade -y
@@ -80,12 +106,53 @@ else
 fi
 
 # Создание рабочей папки
-if [ ! -d /home/deploy/app ]; then
-  echo "📁 Создаём рабочую папку /home/deploy/app"
-  mkdir -p /home/deploy/app
-  chown -R deploy:deploy /home/deploy/app
+if [ ! -d "$APP_DIR" ]; then
+  echo "📁 Создаём рабочую папку $APP_DIR"
+  mkdir -p "$APP_DIR"
+  chown -R deploy:deploy "$APP_DIR"
 else
-  echo "✅ Папка /home/deploy/app уже существует"
+  echo "✅ Папка $APP_DIR уже существует"
+fi
+
+if [[ "$SKIP_ENV_SETUP" != true ]]; then
+  if [ ! -f "$ENV_FILE" ]; then
+    echo "📓 Создаём .env..."
+    read -r -p "🔐 Docker Hub username: " DOCKER_USERNAME
+    read -r -p "🔢 Docker image name (e.g. telegram-bot): " DOCKER_IMAGE_NAME
+    DOCKER_IMAGE="$DOCKER_USERNAME/$DOCKER_IMAGE_NAME"
+    read -r -p "🤖 Telegram Bot Token (можно оставить пустым): " TELEGRAM_TOKEN
+
+    echo "🖊️ Запись .env в $ENV_FILE..."
+    cat <<EOF > "$ENV_FILE"
+DOCKER_USERNAME=$DOCKER_USERNAME
+DOCKER_IMAGE_NAME=DOCKER_IMAGE_NAME
+DOCKER_IMAGE=$DOCKER_IMAGE
+TELEGRAM_TOKEN=$TELEGRAM_TOKEN
+EOF
+    chown deploy:deploy "$ENV_FILE"
+    chmod 600 "$ENV_FILE"
+  else
+    echo "📓 Обнаружен существующий .env. Проверка и обновление переменных..."
+    source "$ENV_FILE"
+
+    update_env_var() {
+      local var_name="$1"
+      local prompt="$2"
+      local current_value="${!var_name}"
+      echo
+      echo "🔍 $var_name: $current_value"
+      read -r -p "$prompt (оставь пустым, чтобы не менять): " new_value
+      if [[ -n "$new_value" ]]; then
+        sed -i "/^$var_name=/d" "$ENV_FILE"
+        echo "$var_name=$new_value" >> "$ENV_FILE"
+      fi
+    }
+
+    update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username"
+    update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)"
+    update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)"
+    update_env_var "TELEGRAM_TOKEN" "🤖 Telegram Bot Token"
+  fi
 fi
 
 read -r -p "❓ Установить и активировать GitHub webhook listener сейчас? (y/N): " setup_webhook
@@ -99,7 +166,6 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   fi
 
   # 📁 Пути
-  APP_DIR="/home/deploy/app"
   HOOKS_DIR="$APP_DIR/webhook"
   LOG_DIR="$APP_DIR/logs"
 
@@ -124,6 +190,7 @@ After=network.target
 Type=simple
 User=deploy
 WorkingDirectory=$HOOKS_DIR
+EnvironmentFile=$ENV_FILE
 ExecStart=/usr/bin/webhook -hooks $HOOKS_DIR/hooks.json -port 9000 -verbose
 Restart=on-failure
 
@@ -150,5 +217,16 @@ if [[ "$disable_root" =~ ^[Yy]$ ]]; then
 else
   echo "⚠️ Root-доступ остался включён."
 fi
+
+echo "🛠️ Проверка инициализации файлов для Docker volume mount..."
+touch /home/deploy/app/VERSION
+touch /home/deploy/app/status.json
+touch "$LOG_DIR/deploy.log"
+
+chown deploy:deploy /home/deploy/app/VERSION
+chown deploy:deploy /home/deploy/app/status.json
+chown deploy:deploy "$LOG_DIR/deploy.log"
+
+echo "✅ VERSION, status.json и deploy.log инициализированы"
 
 echo "🎉 Готово! Окружение настроено. Перезайди в SSH как deploy."
