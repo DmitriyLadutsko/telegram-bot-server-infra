@@ -183,6 +183,23 @@ EOF
   fi
 fi
 
+# 📛 Имя домена
+read -r -p "🌐 Введи домен (например: domen.com): " DOMAIN
+DOMAIN=${DOMAIN,,} # в нижний регистр
+
+NGINX_TEMPLATE="$APP_DIR/nginx/default.conf.tpl"
+NGINX_CONF="$APP_DIR/nginx/default.conf"
+
+if [ -f "$NGINX_TEMPLATE" ]; then
+  echo "🛠 Генерируем nginx config из шаблона с доменом: $DOMAIN"
+  export DOMAIN
+  envsubst "$DOMAIN" < "$NGINX_TEMPLATE" > "$NGINX_CONF"
+  chown deploy:deploy "$NGINX_CONF"
+  echo "✅ Nginx конфиг сгенерирован: $NGINX_CONF"
+else
+  echo "⚠️ Шаблон default.conf.tpl не найден по пути: $NGINX_TEMPLATE"
+fi
+
 read -r -p "❓ Установить и активировать GitHub webhook listener сейчас? (y/N): " setup_webhook
 if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   # Установка webhook, если не установлен

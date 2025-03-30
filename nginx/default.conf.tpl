@@ -1,15 +1,15 @@
 server {
     listen 80;
-    server_name dladutsko.ru www.dladutsko.ru;
+    server_name $DOMAIN www.$DOMAIN;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name dladutsko.ru www.dladutsko.ru;
+    server_name $DOMAIN www.$DOMAIN;
 
-    ssl_certificate /etc/letsencrypt/live/dladutsko.ru/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/dladutsko.ru/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
     # 🌐 Протоколы
     ssl_protocols TLSv1.2 TLSv1.3;

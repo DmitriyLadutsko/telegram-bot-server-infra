@@ -9,5 +9,6 @@ deploy.log
 
 status.json
 VERSION
+/nginx/default.conf
 
 **/.DS_Store
