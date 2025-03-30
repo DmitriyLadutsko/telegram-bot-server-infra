@@ -105,13 +105,23 @@ else
   usermod -aG docker deploy
 fi
 
-# Создание рабочей папки
-if [ ! -d "$APP_DIR" ]; then
-  echo "📁 Создаём рабочую папку $APP_DIR"
-  mkdir -p "$APP_DIR"
-  chown -R deploy:deploy "$APP_DIR"
+# Создание рабочей папки и клонирование репозитория
+if [ -d "$APP_DIR/.git" ]; then
+  echo "✅ Репозиторий уже склонирован в $APP_DIR"
 else
-  echo "✅ Папка $APP_DIR уже существует"
+  echo "🔗 Готов склонировать репозиторий с инфраструктурой в $APP_DIR"
+  read -r -p "❓ Использовать репозиторий по умолчанию? (Y/n): " use_default_repo
+
+  if [[ "$use_default_repo" =~ ^[Nn]$ ]]; then
+    read -r -p "🌐 Введи ссылку на свой репозиторий: " custom_repo
+    git clone "$custom_repo" "$APP_DIR"
+  else
+    DEFAULT_REPO="https://github.com/DmitriyLadutsko/telegram-bot-server-infra.git"
+    echo "📥 Клонируем из $DEFAULT_REPO"
+    su - deploy -c "git clone $DEFAULT_REPO $APP_DIR"
+  fi
+
+  chown -R deploy:deploy "$APP_DIR"
 fi
 
 if [[ "$SKIP_ENV_SETUP" != true ]]; then
@@ -120,19 +130,20 @@ if [[ "$SKIP_ENV_SETUP" != true ]]; then
     read -r -p "🔐 Docker Hub username: " DOCKER_USERNAME
     read -r -p "🔢 Docker image name (e.g. telegram-bot): " DOCKER_IMAGE_NAME
     DOCKER_IMAGE="$DOCKER_USERNAME/$DOCKER_IMAGE_NAME"
-    read -r -p "🤖 Telegram Bot Token (можно оставить пустым): " TELEGRAM_TOKEN
+    read -r -p "🤖 Telegram Bot Token (можно оставить пустым): " TELEGRAM_BOT_TOKEN
 
     echo "🖊️ Запись .env в $ENV_FILE..."
     cat <<EOF > "$ENV_FILE"
 DOCKER_USERNAME=$DOCKER_USERNAME
 DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME
 DOCKER_IMAGE=$DOCKER_IMAGE
-TELEGRAM_TOKEN=$TELEGRAM_TOKEN
+TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
 EOF
     chown deploy:deploy "$ENV_FILE"
     chmod 600 "$ENV_FILE"
   else
     echo "📓 Обнаружен существующий .env. Проверка и обновление переменных..."
+    # shellcheck source=/home/deploy/app/.env
     source "$ENV_FILE"
 
     update_env_var() {
@@ -151,7 +162,7 @@ EOF
     update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username"
     update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)"
     update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)"
-    update_env_var "TELEGRAM_TOKEN" "🤖 Telegram Bot Token"
+    update_env_var "TELEGRAM_BOT_TOKEN" "🤖 Telegram Bot Token"
   fi
 fi
 
