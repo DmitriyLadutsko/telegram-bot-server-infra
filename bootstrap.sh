@@ -124,6 +124,23 @@ else
   chown -R deploy:deploy "$APP_DIR"
 fi
 
+# 🔗 Сохраняем ссылку на репозиторий в bot-repo.json
+read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота (или оставь пустым): " BOT_REPO
+REPO_FILE="/home/deploy/app/nginx/static/bot-repo.json"
+
+mkdir -p /home/deploy/app/nginx/static
+
+if [ -n "$BOT_REPO" ]; then
+  echo "{\"repo\": \"$BOT_REPO\"}" > "$REPO_FILE"
+  echo "✅ Ссылка на репозиторий сохранена в bot-repo.json"
+else
+  echo "{\"repo\": \"\"}" > "$REPO_FILE"
+  echo "ℹ️ bot-repo.json создан, но ссылка пуста — можно обновить позже"
+fi
+
+chown deploy:deploy "$REPO_FILE"
+chmod 644 "$REPO_FILE"
+
 if [[ "$SKIP_ENV_SETUP" != true ]]; then
   if [ ! -f "$ENV_FILE" ]; then
     echo "📓 Создаём .env..."

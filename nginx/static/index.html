@@ -98,10 +98,27 @@
 <p>Version: <span id="version">loading...</span></p>
 <p>Uptime: <span id="uptime">loading...</span></p>
 <p>Last deploy: <span id="deploy">loading...</span></p>
-<p><a href="https://github.com/DmitriyLadutsko/demo-bot/releases" target="_blank">View Latest Release</a></p>
+<p><a id="repo-link" href="#" target="_blank" style="display:none;">View Latest Release</a></p>
 <div class="footer">Updated via GitHub Webhook | Hosted on <code>dladutsko.ru</code></div>
 
 <script>
+    fetch('/bot-repo.json')
+        .then(res => res.json())
+        .then(data => {
+            const repo = data.repo;
+            const link = document.getElementById('repo-link');
+            if (repo && repo.trim() !== "") {
+                link.href = repo + '/releases';
+                link.textContent = "View Latest Release";
+            } else {
+                link.style.display = "none";
+            }
+        })
+        .catch(() => {
+            const link = document.getElementById('repo-link');
+            link.style.display = "none";
+        });
+
     // Healthcheck
     fetch('/health')
         .then(res => res.json())
