@@ -3,7 +3,12 @@
     "id": "deploy",
     "execute-command": "/home/deploy/app/webhook/deploy.sh",
     "command-working-directory": "/home/deploy/app",
-    "pass-arguments-to-command": [],
+    "pass-environment-to-command": [
+          { "source": "env", "name": "DOCKER_USERNAME" },
+          { "source": "env", "name": "DOCKER_IMAGE_NAME" },
+          { "source": "env", "name": "DOCKER_IMAGE" },
+          { "source": "payload", "name": "release.tag_name", "envname": "RELEASE_TAG" }
+        ],
     "trigger-rule": {
       "and": [
         {

@@ -74,10 +74,10 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 
 ## 📋 .env Example
 ```ini
-TELEGRAM_TOKEN=your_bot_token_here
+TELEGRAM_BOT_TOKEN=your_bot_token_here
 WEBHOOK_SECRET=your_webhook_secret_here
 ```
-- TELEGRAM_TOKEN is injected into your Spring Boot bot container
+- TELEGRAM_BOT_TOKEN is injected into your Spring Boot bot container
 - WEBHOOK_SECRET is used to verify GitHub webhook signature
 
 ---
