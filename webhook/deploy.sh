@@ -9,6 +9,9 @@ echo "📦 Version from webhook: $RELEASE_TAG" >> $LOG_FILE
 TAG_VERSION="${RELEASE_TAG#v}"
 IMAGE="${DOCKER_IMAGE}:${TAG_VERSION:-latest}"
 
+# Очищаем старые образы и контейнеры
+docker system prune -af --volumes >> $LOG_FILE 2>&1
+
 # ⏳ Ожидание появления нужного образа на Docker Hub
 MAX_ATTEMPTS=10
 SLEEP_SECONDS=6
