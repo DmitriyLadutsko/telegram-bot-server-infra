@@ -135,7 +135,7 @@ if [ -n "$BOT_REPO" ]; then
   export BOT_REPO
   if [ -f "$TEMPLATE_PATH" ]; then
     echo "🛠 Генерируем bot-repo.json из шаблона..."
-    envsubst "${BOT_REPO}" < "$TEMPLATE_PATH" > "$OUTPUT_PATH"
+    su - deploy -c "BOT_REPO='$BOT_REPO' envsubst < $TEMPLATE_PATH > $OUTPUT_PATH"
   else
     echo "⚠️ Шаблон bot-repo.json.tpl не найден: $TEMPLATE_PATH"
     echo "{\"repo\": \"$BOT_REPO\"}" > "$OUTPUT_PATH"
@@ -148,9 +148,6 @@ fi
 chown deploy:deploy "$OUTPUT_PATH"
 chmod 644 "$OUTPUT_PATH"
 echo "✅ bot-repo.json готов: $OUTPUT_PATH"
-
-chown deploy:deploy "$REPO_FILE"
-chmod 644 "$REPO_FILE"
 
 if [[ "$SKIP_ENV_SETUP" != true ]]; then
   if [ ! -f "$ENV_FILE" ]; then
@@ -204,7 +201,8 @@ NGINX_CONF="$APP_DIR/nginx/default.conf"
 if [ -f "$NGINX_TEMPLATE" ]; then
   echo "🛠 Генерируем nginx config из шаблона с доменом: $DOMAIN"
   export DOMAIN
-  envsubst "$DOMAIN" < "$NGINX_TEMPLATE" > "$NGINX_CONF"
+  su - deploy -c "DOMAIN='$DOMAIN' envsubst < $NGINX_TEMPLATE > $NGINX_CONF"
+  sed -i 's|__DOLLAR__host|$host|g' "$NGINX_CONF"
   chown deploy:deploy "$NGINX_CONF"
   echo "✅ Nginx конфиг сгенерирован: $NGINX_CONF"
 else

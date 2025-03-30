@@ -42,13 +42,13 @@ server {
         deny all;
 
         proxy_pass http://172.17.0.1:9000/hooks/deploy;
-        proxy_set_header Host $host;
+        proxy_set_header Host __DOLLAR__host;
     }
 
     # 🔄 Прокси запросов к боту
     location /health {
         proxy_pass http://telegram-bot:8080/actuator/health;
-        proxy_set_header Host $host;
+        proxy_set_header Host __DOLLAR__host;
     }
 
     # 📦 Статика
