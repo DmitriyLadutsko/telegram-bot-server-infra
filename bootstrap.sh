@@ -125,18 +125,29 @@ else
 fi
 
 # 🔗 Сохраняем ссылку на репозиторий в bot-repo.json
-read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота (или оставь пустым): " BOT_REPO
-REPO_FILE="/home/deploy/app/nginx/static/bot-repo.json"
+TEMPLATE_PATH="$APP_DIR/nginx/templates/bot-repo.json.tpl"
+OUTPUT_PATH="$APP_DIR/nginx/static/bot-repo.json"
 
-mkdir -p /home/deploy/app/nginx/static
+read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота (или оставь пустым): " BOT_REPO
+mkdir -p "$(dirname "$OUTPUT_PATH")"
 
 if [ -n "$BOT_REPO" ]; then
-  echo "{\"repo\": \"$BOT_REPO\"}" > "$REPO_FILE"
-  echo "✅ Ссылка на репозиторий сохранена в bot-repo.json"
+  export BOT_REPO
+  if [ -f "$TEMPLATE_PATH" ]; then
+    echo "🛠 Генерируем bot-repo.json из шаблона..."
+    envsubst "${BOT_REPO}" < "$TEMPLATE_PATH" > "$OUTPUT_PATH"
+  else
+    echo "⚠️ Шаблон bot-repo.json.tpl не найден: $TEMPLATE_PATH"
+    echo "{\"repo\": \"$BOT_REPO\"}" > "$OUTPUT_PATH"
+  fi
 else
-  echo "{\"repo\": \"\"}" > "$REPO_FILE"
+  echo "{\"repo\": \"\"}" > "$OUTPUT_PATH"
   echo "ℹ️ bot-repo.json создан, но ссылка пуста — можно обновить позже"
 fi
+
+chown deploy:deploy "$OUTPUT_PATH"
+chmod 644 "$OUTPUT_PATH"
+echo "✅ bot-repo.json готов: $OUTPUT_PATH"
 
 chown deploy:deploy "$REPO_FILE"
 chmod 644 "$REPO_FILE"
@@ -184,10 +195,10 @@ EOF
 fi
 
 # 📛 Имя домена
-read -r -p "🌐 Введи домен (например: domen.com): " DOMAIN
+read -r -p "🌐 Введи домен (например: domain.com): " DOMAIN
 DOMAIN=${DOMAIN,,} # в нижний регистр
 
-NGINX_TEMPLATE="$APP_DIR/nginx/default.conf.tpl"
+NGINX_TEMPLATE="$APP_DIR/nginx/templates/default.conf.tpl"
 NGINX_CONF="$APP_DIR/nginx/default.conf"
 
 if [ -f "$NGINX_TEMPLATE" ]; then

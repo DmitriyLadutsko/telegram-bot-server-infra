@@ -10,5 +10,6 @@ deploy.log
 status.json
 VERSION
 /nginx/default.conf
+/nginx/static/bot-repo.json
 
 **/.DS_Store
