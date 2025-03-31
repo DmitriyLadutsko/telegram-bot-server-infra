@@ -13,17 +13,21 @@ This repository contains the infrastructure setup for running a **Spring Boot-ba
 ## 📂 Project Structure
 ```
 telegram-bot-server-infra/
-├── docker-compose.yml        # Core infrastructure
-├── bootstrap.sh              # Bootstrap script for initial server setup
-├── .env                      # Environment variables (secrets)
-├── webhook/                  # Webhook setup (with deploy script)
-│   ├── hooks.json.tpl
-│   └── deploy.sh
-├── nginx/                    # Nginx config + HTML status page
-│   ├── default.conf
-│   └── static/
-│       ├── index.html
-│       └── favicon.ico
+├── docker-compose.yml         # Core infrastructure
+├── bootstrap.sh               # Bootstrap script for initial server setup
+├── .env.example               # Example env file (tokens, secrets)
+├── webhook/                   # Webhook setup (with deploy script)
+│   ├── hooks.json.tpl         # Templated hooks for GitHub repos
+│   └── deploy.sh              # Script triggered by Webhook
+├── nginx/                     # Nginx config + HTML status page
+│   ├── static/
+│   │   ├── index.html         # Status/info page
+│   │   └── favicon.ico
+│   ├── templates/
+│   │   ├── default.conf.tpl   # Nginx reverse proxy config
+│   │   └── bot-repo.json.tpl  # Bot repo url
+│   ├── github-ips             # GitHub IP list (auto-updated)
+│   └── update-github-ips.sh   # Script to refresh IP list
 ```
 ---
 
@@ -33,10 +37,11 @@ telegram-bot-server-infra/
 |-------------------|-------------------------------------------------------------------------------------------|
 | **Nginx**         | SSL termination, reverse proxy to internal services                                       |
 | **Webhook (systemd)** | Listens for GitHub `release` events and triggers `deploy.sh`                                  |
-| **Telegram Bot**  | Pulled as Docker image (`dladutsko/telegram-bot:latest`) and managed via `docker-compose` |
+| **Telegram Bot**  | Pulled as Docker image (`user-name/image-name:latest`) and managed via `docker-compose` |
 | **HTTPS**           | Auto-renewed certificates via Let’s Encrypt                                               |
 | **Deploy**        | Automatic on GitHub Release (`git tag vX.X.X`)                                              |
 | **Bootstrap**     | Prepares server: Docker, user, SSH, folders, etc.           |
+| **Status Page**     | Minimal static HTML page available on `/`           |
 
 ---
 
@@ -48,8 +53,7 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 
 📥 After setup:
 - Log in as `deploy`
-- Clone your infrastructure repo into `/home/deploy/app`
-- Set `.env` values
+- Set `.env` values (if not set during bootstrap work)
 - Run `docker compose up -d`
 
 ✅ The server is ready.
@@ -75,27 +79,30 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 ## 📋 .env Example
 ```ini
 TELEGRAM_BOT_TOKEN=your_bot_token_here
-WEBHOOK_SECRET=your_webhook_secret_here
+DOCKER_USERNAME=your_docker_username_here
+DOCKER_IMAGE_NAME=your_docker_image_name_here
+DOCKER_IMAGE=your_docker_image_here
 ```
-- TELEGRAM_BOT_TOKEN is injected into your Spring Boot bot container
-- WEBHOOK_SECRET is used to verify GitHub webhook signature
+- `TELEGRAM_BOT_TOKEN` is injected into your Spring Boot bot container
+- `DOCKER_USERNAME`, `DOCKER_IMAGE_NAME`, `DOCKER_IMAGE` is used to pull bot image
 
 ---
 
-## 🔐 Security by Default
-- Webhook only exposed via Nginx
-- HTTPS enabled
-- SSH root access can be disabled automatically
+## 🔐 Webhook Security
+- Webhook only exposed via Nginx (not public directly)
+- GitHub IPs are verified using `nginx/github-ips`
+- Signature verification using `WEBHOOK_SECRET`
+- `webhook runs` as systemd service, local port only
 
 ---
 
-## 🔧 Local Testing
-```bash
-git clone https://github.com/your-user/infrastructure.git
-cd infrastructure
-cp .env.example .env
-docker compose up -d
+## 🛏️ Status Page
+After deployment, open your server in a browser:
+```ini
+https://<your-domain>
 ```
+You’ll see a minimal status/info page located at `nginx/static/index.html`
+
 ---
 
 ## 🤝 Paired Project
@@ -108,6 +115,7 @@ This infra is designed to work with: 👉 [telegram-bot-template](https://github
 - Telegram deployment alerts
 - Prometheus/Grafana monitoring
 - Docker Swarm/Kubernetes support
+- Per-bot status + management page
 
 ---
 
