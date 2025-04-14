@@ -84,7 +84,7 @@ DOCKER_USERNAME=your_docker_username_here
 DOCKER_IMAGE_NAME=your_docker_image_name_here
 DOCKER_IMAGE=your_docker_image_here
 ```
-- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_NAME` is injected into your Spring Boot bot container
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_NAME` are injected into your Spring Boot bot container
 - `DOCKER_USERNAME`, `DOCKER_IMAGE_NAME`, `DOCKER_IMAGE` is used to pull bot image
 
 ---
