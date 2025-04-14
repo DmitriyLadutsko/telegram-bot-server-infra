@@ -2,7 +2,7 @@
   {
     "id": "${BOT_DOCKER_SERVICE_NAME}-deploy",
     "execute-command": "${APP_DIR}/webhook/deploy.sh",
-    "command-working-directory": "${APP_DIR}",
+    "command-working-directory": "${APP_DIR}/bots/${BOT_DOCKER_SERVICE_NAME}",
     "pass-environment-to-command": [
           { "source": "env", "name": "DOCKER_USERNAME" },
           { "source": "env", "name": "DOCKER_IMAGE_NAME" },

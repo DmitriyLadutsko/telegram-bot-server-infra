@@ -1,7 +1,7 @@
 services:
   bot1:
-    image: ${DOCKER_IMAGE}:latest
-    container_name: ${REPOSITORY_NAME}-bot1
+    image: ${BOT1_DOCKER_IMAGE}:latest
+    container_name: ${BOT1_REPOSITORY_NAME}-bot1
     restart: unless-stopped
     env_file:
       - ./bots/bot1/.env

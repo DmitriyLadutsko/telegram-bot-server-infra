@@ -4,6 +4,7 @@ APP_DIR="/home/deploy/app"
 BOT_SERVICE_NAME="bot1"
 BOT_DIR="$APP_DIR/bots/$BOT_SERVICE_NAME"
 ENV_FILE="$BOT_DIR/.env"
+COMMON_ENV_FILE="$APP_DIR/.env"
 
 # 📝 Ввод конфигурации
 if [ ! -f "$ENV_FILE" ]; then
@@ -167,41 +168,63 @@ if [[ "$SKIP_ENV_SETUP" != true ]]; then
     read -r -p "🤖 Telegram Bot Token: " TELEGRAM_BOT_TOKEN
     read -r -p "🤖 Telegram Bot Name: " TELEGRAM_BOT_NAME
 
+    mkdir -p "$(dirname "$ENV_FILE")"
+
     echo "🖊️ Запись .env в $ENV_FILE..."
     cat <<EOF > "$ENV_FILE"
 DOCKER_USERNAME=$DOCKER_USERNAME
 DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME
 DOCKER_IMAGE=$DOCKER_IMAGE
 TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
-TELEGRAM_BOT_NAME=$TELEGRAM_BOT_NAME
-REPOSITORY_NAME=$BOT_NAME_REPO
+TELEGRAM_BOT_NAME="$TELEGRAM_BOT_NAME"
+REPOSITORY_NAME="$BOT_NAME_REPO"
 EOF
+    chown -R deploy:deploy "${APP_DIR}/bots"
+    chmod -R 755 "${APP_DIR}/bots"
     chown deploy:deploy "$ENV_FILE"
     chmod 600 "$ENV_FILE"
+
+    echo "🖊️ Запись общего .env в $COMMON_ENV_FILE..."
+    cat <<EOF > "$COMMON_ENV_FILE"
+BOT1_DOCKER_IMAGE=$DOCKER_IMAGE
+BOT1_REPOSITORY_NAME="$BOT_NAME_REPO"
+EOF
+    chown deploy:deploy "$COMMON_ENV_FILE"
+    chmod 600 "$COMMON_ENV_FILE"
+
+    echo "✅ .env и общий .env созданы: $ENV_FILE и $COMMON_ENV_FILE"
+
   else
     echo "📓 Обнаружен существующий .env. Проверка и обновление переменных..."
     # shellcheck source=$ENV_FILE
     source "$ENV_FILE"
 
+    # shellcheck source=$COMMON_ENV_FILE
+    source "$COMMON_ENV_FILE"
+
     update_env_var() {
       local var_name="$1"
       local prompt="$2"
+      local env_file="$3"
       local current_value="${!var_name}"
+
       echo
       echo "🔍 $var_name: $current_value"
       read -r -p "$prompt (оставь пустым, чтобы не менять): " new_value
       if [[ -n "$new_value" ]]; then
-        sed -i "/^$var_name=/d" "$ENV_FILE"
-        echo "$var_name=$new_value" >> "$ENV_FILE"
+        sed -i "/^$var_name=/d" "$env_file"
+        echo "$var_name=$new_value" >> "$env_file"
       fi
     }
 
-    update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username"
-    update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)"
-    update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)"
-    update_env_var "TELEGRAM_BOT_TOKEN" "🤖 Telegram Bot Token"
-    update_env_var "TELEGRAM_BOT_NAME" "🤖 Telegram Bot Name"
-    update_env_var "REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name"
+    update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username" "$ENV_FILE"
+    update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)" "$ENV_FILE"
+    update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)" "$ENV_FILE"
+    update_env_var "BOT1_DOCKER_IMAGE" "📦 Docker image (имя с namespace) для первого бота" "$COMMON_ENV_FILE"
+    update_env_var "TELEGRAM_BOT_TOKEN" "🤖 Telegram Bot Token" "$ENV_FILE"
+    update_env_var "TELEGRAM_BOT_NAME" "🤖 Telegram Bot Name" "$ENV_FILE"
+    update_env_var "REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name" "$ENV_FILE"
+    update_env_var "BOT1_REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name для первого бота" "$COMMON_ENV_FILE"
   fi
 fi
 
@@ -215,7 +238,7 @@ NGINX_CONF="$APP_DIR/nginx/default.conf"
 if [ -f "$NGINX_TEMPLATE" ]; then
   echo "🛠 Генерируем nginx config из шаблона с доменом: $DOMAIN"
   export DOMAIN
-  su - deploy -c "DOMAIN='$DOMAIN' envsubst < $NGINX_TEMPLATE > $NGINX_CONF"
+  su - deploy -c "DOMAIN='$DOMAIN' BOT_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $NGINX_TEMPLATE > $NGINX_CONF"
   sed -i 's|__DOLLAR__|$|g' "$NGINX_CONF"
   chown deploy:deploy "$NGINX_CONF"
   echo "✅ Nginx конфиг сгенерирован: $NGINX_CONF"
@@ -235,7 +258,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
 
   # 📁 Пути
   HOOKS_DIR="$APP_DIR/webhook"
-  LOG_DIR="$APP_DIR/logs"
+  LOG_DIR="$BOT_DIR/logs"
 
   mkdir -p "$LOG_DIR"
   chown -R deploy:deploy "$LOG_DIR"
@@ -245,7 +268,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   export WEBHOOK_SECRET="$input_secret"
 
   echo "🛠 Генерируем hooks.json из шаблона..."
-  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' APP_DIR='$APP_DIR' envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
+  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' APP_DIR='$APP_DIR' BOT_DOCKER_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
 
   # systemd unit
   echo "📦 Создаём systemd unit для webhook..."

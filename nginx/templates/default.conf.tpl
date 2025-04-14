@@ -1,7 +1,7 @@
 server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
-    return 301 https://$host$request_uri;
+    return 301 https://__DOLLAR__host__DOLLAR__request_uri;
 }
 
 server {
@@ -49,7 +49,7 @@ server {
 
     # 🔄 Прокси запросов к боту
     location /health {
-        proxy_pass http://telegram-bot:8080/actuator/health;
+        proxy_pass http://$BOT_SERVICE_NAME:8080/actuator/health;
         proxy_set_header Host __DOLLAR__host;
     }
 
