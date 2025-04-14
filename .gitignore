@@ -1,15 +1,13 @@
 /.idea/
-.env
-deploy.log
 /logs/
 /certs/
 /webhook/node_modules/
 /webhook/logs/
 /webhook/hooks.json
 
-status.json
-VERSION
 /nginx/default.conf
 /nginx/static/bot-repo.json
+
+/bots/
 
 **/.DS_Store

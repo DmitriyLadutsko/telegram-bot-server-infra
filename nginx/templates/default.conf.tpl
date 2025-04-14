@@ -34,14 +34,16 @@ server {
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
     # 🔁 Прокси запросов к вебхуку или другому сервису
-    location /github-webhook {
+    location ~ ^/github-webhook/deploy/(.+)__DOLLAR__ {
         allow 192.30.252.0/22;
         allow 185.199.108.0/22;
         allow 140.82.112.0/20;
         allow 143.55.64.0/20;
         deny all;
 
-        proxy_pass http://172.17.0.1:9000/hooks/deploy;
+        set __DOLLAR__dockerservicename __DOLLAR__1;
+
+        proxy_pass http://172.17.0.1:9000/hooks/deploy-__DOLLAR__dockerservicename;
         proxy_set_header Host __DOLLAR__host;
     }
 

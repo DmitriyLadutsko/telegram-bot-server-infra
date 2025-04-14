@@ -109,7 +109,7 @@
             const link = document.getElementById('repo-link');
             if (repo && repo.trim() !== "") {
                 link.href = repo + '/releases';
-                link.textContent = "View Latest Release";
+                link.style.display = "inline";
             } else {
                 link.style.display = "none";
             }

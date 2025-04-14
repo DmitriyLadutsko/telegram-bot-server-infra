@@ -58,11 +58,11 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 
 ✅ The server is ready.
 
-💡 At the end of the script, you’ll be asked if you want to disable root SSH access. If you say “yes”, make sure you can log in as deploy via SSH first.
+💡 At the end of the script, you’ll be asked if you want to disable root SSH access. If you say “yes”, make sure you can log in as `deploy` via SSH first.
 
 ---
 
-📌 Tip: It’s best to run bootstrap.sh only once when setting up a fresh VPS. Running it again is safe — the script checks whether Docker and the deploy user already exist and skips their creation if so.
+📌 Tip: It’s best to run `bootstrap.sh` only once when setting up a fresh VPS. Running it again is safe — the script checks whether Docker and the `deploy` user already exist and skips their creation if so.
 
 ---
 
@@ -79,11 +79,12 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 ## 📋 .env Example
 ```ini
 TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_BOT_NAME=your_bot_name_here
 DOCKER_USERNAME=your_docker_username_here
 DOCKER_IMAGE_NAME=your_docker_image_name_here
 DOCKER_IMAGE=your_docker_image_here
 ```
-- `TELEGRAM_BOT_TOKEN` is injected into your Spring Boot bot container
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_NAME` is injected into your Spring Boot bot container
 - `DOCKER_USERNAME`, `DOCKER_IMAGE_NAME`, `DOCKER_IMAGE` is used to pull bot image
 
 ---
