@@ -1,5 +1,10 @@
 set -e
 
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Please run this script as root (or with sudo)"
+  exit 1
+fi
+
 APP_DIR="/home/deploy/app"
 TEMPLATES_DIR="$APP_DIR/templates"
 BOT_SERVICE_NAME="bot1"
