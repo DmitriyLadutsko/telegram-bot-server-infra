@@ -192,6 +192,7 @@ EOF
 
     echo "🖊️ Запись общего .env в $COMMON_ENV_FILE..."
     cat <<EOF > "$COMMON_ENV_FILE"
+KNOWN_BOTS="$BOT_SERVICE_NAME"
 BOT1_DOCKER_IMAGE=$DOCKER_IMAGE
 BOT1_REPOSITORY_NAME="$BOT_NAME_REPO"
 EOF
@@ -231,6 +232,7 @@ EOF
     update_env_var "TELEGRAM_BOT_NAME" "🤖 Telegram Bot Name" "$ENV_FILE"
     update_env_var "REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name" "$ENV_FILE"
     update_env_var "BOT1_REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name для первого бота" "$COMMON_ENV_FILE"
+    update_env_var "KNOWN_BOTS" "🔗 Список известных ботов (через запятую)" "$COMMON_ENV_FILE"
   fi
 fi
 
