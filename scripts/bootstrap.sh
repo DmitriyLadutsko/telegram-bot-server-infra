@@ -1,6 +1,7 @@
 set -e
 
 APP_DIR="/home/deploy/app"
+TEMPLATES_DIR="$APP_DIR/templates"
 BOT_SERVICE_NAME="bot1"
 BOT_DIR="$APP_DIR/bots/$BOT_SERVICE_NAME"
 ENV_FILE="$BOT_DIR/.env"
@@ -130,7 +131,7 @@ fi
 
 if [[ "$SKIP_ENV_SETUP" != true ]]; then
   # 🔗 Сохраняем ссылку на репозиторий в bot-repo.json
-  TEMPLATE_PATH="$APP_DIR/nginx/templates/bot-repo.json.tpl"
+  TEMPLATE_PATH="$TEMPLATES_DIR/bot-repo.json.tpl"
   OUTPUT_PATH="$APP_DIR/nginx/static/bot-repo.json"
 
   read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота: " BOT_REPO
@@ -232,7 +233,7 @@ fi
 read -r -p "🌐 Введи домен (например: domain.com): " DOMAIN
 DOMAIN=${DOMAIN,,} # в нижний регистр
 
-NGINX_TEMPLATE="$APP_DIR/nginx/templates/default.conf.tpl"
+NGINX_TEMPLATE="$TEMPLATES_DIR/nginx.default.conf.tpl"
 NGINX_CONF="$APP_DIR/nginx/default.conf"
 
 if [ -f "$NGINX_TEMPLATE" ]; then
@@ -268,7 +269,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   export WEBHOOK_SECRET="$input_secret"
 
   echo "🛠 Генерируем hooks.json из шаблона..."
-  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' APP_DIR='$APP_DIR' BOT_DOCKER_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
+  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' APP_DIR='$APP_DIR' BOT_DOCKER_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $TEMPLATES_DIR/webhook.hooks.json.tpl > $HOOKS_DIR/hooks.json"
 
   # systemd unit
   echo "📦 Создаём systemd unit для webhook..."

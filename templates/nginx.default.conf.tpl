@@ -35,11 +35,7 @@ server {
 
     # 🔁 Прокси запросов к вебхуку или другому сервису
     location ~ ^/github-webhook/deploy/(.+)__DOLLAR__ {
-        allow 192.30.252.0/22;
-        allow 185.199.108.0/22;
-        allow 140.82.112.0/20;
-        allow 143.55.64.0/20;
-        deny all;
+        include /etc/nginx/conf.d/github-ips;
 
         set __DOLLAR__dockerservicename __DOLLAR__1;
 
