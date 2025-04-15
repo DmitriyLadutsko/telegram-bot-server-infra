@@ -13,21 +13,24 @@ This repository contains the infrastructure setup for running a **Spring Boot-ba
 ## 📂 Project Structure
 ```
 telegram-bot-server-infra/
-├── docker-compose.yml         # Core infrastructure
-├── bootstrap.sh               # Bootstrap script for initial server setup
-├── .env.example               # Example env file (tokens, secrets)
-├── webhook/                   # Webhook setup (with deploy script)
-│   ├── hooks.json.tpl         # Templated hooks for GitHub repos
-│   └── deploy.sh              # Script triggered by Webhook
-├── nginx/                     # Nginx config + HTML status page
+├── docker-compose.yml              # Core infrastructure
+├── .env.example                    # Example env file (tokens, secrets)
+├── scripts/                        # Helper scripts
+│   ├── bootstrap.sh                # Bootstrap script for server setup
+│   ├── certbot-setup.sh            # Setup script for Let's Encrypt
+│   ├── install-github-ips-timer.sh # Install GitHub IPs update timer
+│   └── update-github-ips.sh        # Script to refresh GitHub IP list
+├── templates/                      # Templated files
+│   ├── bot-repo.json.tpl           # Templated bot repo URL
+│   ├── nginx.default.conf.tpl      # Templated Nginx docker servoce config
+│   └── webhook.hooks.json.tpl      # Templated webhook servoce hooks
+├── webhook/                        # Webhook setup (with deploy script)
+│   └── deploy.sh                   # Script triggered by Webhook
+├── nginx/                          # Nginx config + HTML status page
 │   ├── static/
-│   │   ├── index.html         # Status/info page
+│   │   ├── index.html              # Status/info page
 │   │   └── favicon.ico
-│   ├── templates/
-│   │   ├── default.conf.tpl   # Nginx reverse proxy config
-│   │   └── bot-repo.json.tpl  # Bot repo url
-│   ├── github-ips             # GitHub IP list (auto-updated)
-│   └── update-github-ips.sh   # Script to refresh IP list
+│   └── github-ips                  # GitHub IP list (auto-updated)
 ```
 ---
 
@@ -64,6 +67,47 @@ curl -sSL https://raw.githubusercontent.com/DmitriyLadutsko/telegram-bot-server-
 
 📌 Tip: It’s best to run `bootstrap.sh` only once when setting up a fresh VPS. Running it again is safe — the script checks whether Docker and the `deploy` user already exist and skips their creation if so.
 
+---
+
+## 🧭 What You Can Do Next
+Once your server is bootstrapped and the bot is running, you can optionally enhance your setup:
+- 🔐 Enable HTTPS for secure webhooks and access, using Let’s Encrypt + Cloudflare DNS
+- 🔄 Auto-update GitHub IPs to make sure webhook access is always up-to-date
+- 💡 Explore more ideas in the bottom section: Prometheus, alerts, bot status pages…
+
+---
+
+## 🔐HTTPS Setup (Let’s Encrypt + Cloudflare DNS)
+This infra uses Nginx with HTTPS via **Let’s Encrypt** certificates.
+
+To request and auto-renew SSL certs for your domain:
+```bash
+./certbot-setup.sh
+```
+This will:
+- Install `certbot` with the Cloudflare DNS plugin
+- Ask for your domain and Cloudflare API token
+- Request wildcard cert for yourdomain.com and *.yourdomain.com
+- Set up auto-renewal with a systemd timer that reloads Nginx
+
+Make sure your Cloudflare API token has `DNS:Edit` permissions.
+
+---
+
+## 🔄 Auto-update GitHub Webhook IPs (optional)
+To avoid manual updates of GitHub IPs (used to restrict webhook access), you can install a systemd timer:
+```bash
+sudo ./scripts/install-github-ips-timer.sh
+```
+This will:
+- Create a systemd service and timer
+- Run `update-github-ips.sh` once per day
+- Reload Nginx after update
+
+You can still run it manually at any time:
+```bash
+./scripts/update-github-ips.sh
+```
 ---
 
 ## 🔁 GitHub Release → Auto Deploy
