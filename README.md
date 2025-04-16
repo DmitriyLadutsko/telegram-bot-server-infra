@@ -22,8 +22,8 @@ telegram-bot-server-infra/
 │   └── update-github-ips.sh        # Script to refresh GitHub IP list
 ├── templates/                      # Templated files
 │   ├── bot-repo.json.tpl           # Templated bot repo URL
-│   ├── nginx.default.conf.tpl      # Templated Nginx docker servoce config
-│   └── webhook.hooks.json.tpl      # Templated webhook servoce hooks
+│   ├── nginx.default.conf.tpl      # Templated Nginx docker service config
+│   └── webhook.hooks.json.tpl      # Templated webhook service hooks
 ├── webhook/                        # Webhook setup (with deploy script)
 │   └── deploy.sh                   # Script triggered by Webhook
 ├── nginx/                          # Nginx config + HTML status page
