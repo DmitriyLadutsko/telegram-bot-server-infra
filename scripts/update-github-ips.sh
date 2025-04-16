@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# 📁 Путь до директории с nginx конфигами
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_FILE="$SCRIPT_DIR/github-ips"
+# 📁 Абсолютный путь до директории проекта
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# 📄 Целевой файл в nginx конфигурации
+TARGET_FILE="$PROJECT_ROOT/nginx/github-ips"
 
 # 📦 Получаем IP-диапазоны из GitHub API
 echo "📡 Получение IP-адресов GitHub Webhook..."

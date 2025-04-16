@@ -1,13 +1,15 @@
 [
   {
-    "id": "deploy",
-    "execute-command": "/home/deploy/app/webhook/deploy.sh",
-    "command-working-directory": "/home/deploy/app",
+    "id": "deploy-${BOT_DOCKER_SERVICE_NAME}",
+    "execute-command": "${APP_DIR}/webhook/deploy.sh",
+    "command-working-directory": "${APP_DIR}/bots/${BOT_DOCKER_SERVICE_NAME}",
+    "pass-arguments-to-command": [
+          { "source": "string", "name": "${APP_DIR}" },
+          { "source": "string", "name": "${BOT_DOCKER_SERVICE_NAME}" }
+        ],
     "pass-environment-to-command": [
-          { "source": "env", "name": "DOCKER_USERNAME" },
-          { "source": "env", "name": "DOCKER_IMAGE_NAME" },
-          { "source": "env", "name": "DOCKER_IMAGE" },
-          { "source": "payload", "name": "release.tag_name", "envname": "RELEASE_TAG" }
+          { "source": "payload", "name": "release.tag_name", "envname": "RELEASE_TAG" },
+          { "source": "payload", "name": "repository.name", "envname": "REPOSITORY_NAME" }
         ],
     "trigger-rule": {
       "and": [

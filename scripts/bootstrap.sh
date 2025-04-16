@@ -1,16 +1,26 @@
 set -e
 
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Please run this script as root (or with sudo)"
+  exit 1
+fi
+
 APP_DIR="/home/deploy/app"
-ENV_FILE="$APP_DIR/.env"
+TEMPLATES_DIR="$APP_DIR/templates"
+BOT_SERVICE_NAME="bot1"
+BOT_DIR="$APP_DIR/bots/$BOT_SERVICE_NAME"
+ENV_FILE="$BOT_DIR/.env"
+COMMON_ENV_FILE="$APP_DIR/.env"
 
 # 📝 Ввод конфигурации
 if [ ! -f "$ENV_FILE" ]; then
   echo
-  echo "📝 Для полной настройки потребуется ввести:"
+  echo "📝 Для полной настройки потребуется ввести данные первого бота:"
   echo "   • Docker Hub username"
   echo "   • Имя Docker-образа Telegram-бота"
+  echo "   • Telegram Bot Token"
+  echo "   • Telegram Bot Name"
   echo "   • GitHub Webhook Secret"
-  echo "   • (опционально) Telegram Bot Token"
   echo
   echo "✅ Рекомендуется ввести всё сразу, чтобы авто-деплой работал без ручной донастройки."
   echo
@@ -20,9 +30,9 @@ if [ ! -f "$ENV_FILE" ]; then
     echo
     echo "⚠️  Установка будет продолжена *без конфигурации .env и запуска webhook.service*."
     echo "   Ты сможешь вручную:"
-    echo "     • создать файл /home/deploy/app/.env"
+    echo "     • создать файл ${ENV_FILE}"
     echo "     • сгенерировать webhook/hooks.json"
-    echo "     • и запустить сервис webhook вручную"
+    echo "     • и запустить сервис webhook"
     echo
     echo "ℹ️  Или можешь перезапустить bootstrap.sh позже, когда будешь готов."
     echo
@@ -124,38 +134,47 @@ else
   chown -R deploy:deploy "$APP_DIR"
 fi
 
-# 🔗 Сохраняем ссылку на репозиторий в bot-repo.json
-TEMPLATE_PATH="$APP_DIR/nginx/templates/bot-repo.json.tpl"
-OUTPUT_PATH="$APP_DIR/nginx/static/bot-repo.json"
-
-read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота (или оставь пустым): " BOT_REPO
-mkdir -p "$(dirname "$OUTPUT_PATH")"
-
-if [ -n "$BOT_REPO" ]; then
-  export BOT_REPO
-  if [ -f "$TEMPLATE_PATH" ]; then
-    echo "🛠 Генерируем bot-repo.json из шаблона..."
-    su - deploy -c "BOT_REPO='$BOT_REPO' envsubst < $TEMPLATE_PATH > $OUTPUT_PATH"
-  else
-    echo "⚠️ Шаблон bot-repo.json.tpl не найден: $TEMPLATE_PATH"
-    echo "{\"repo\": \"$BOT_REPO\"}" > "$OUTPUT_PATH"
-  fi
-else
-  echo "{\"repo\": \"\"}" > "$OUTPUT_PATH"
-  echo "ℹ️ bot-repo.json создан, но ссылка пуста — можно обновить позже"
-fi
-
-chown deploy:deploy "$OUTPUT_PATH"
-chmod 644 "$OUTPUT_PATH"
-echo "✅ bot-repo.json готов: $OUTPUT_PATH"
-
 if [[ "$SKIP_ENV_SETUP" != true ]]; then
+  # 🔗 Сохраняем ссылку на репозиторий в bot-repo.json
+  TEMPLATE_PATH="$TEMPLATES_DIR/bot-repo.json.tpl"
+  OUTPUT_PATH="$APP_DIR/nginx/static/bot-repo.json"
+
+  read -r -p "🔗 Введи ссылку на GitHub-репозиторий Telegram-бота: " BOT_REPO
+  mkdir -p "$(dirname "$OUTPUT_PATH")"
+
+  if [ -n "$BOT_REPO" ]; then
+    export BOT_REPO
+
+    # 🔽 Извлечение имени репозитория из ссылки
+    BOT_NAME_REPO=$(basename -s .git "$BOT_REPO")
+    BOT_NAME_REPO=${BOT_NAME_REPO,,}  # в нижний регистр
+    echo "📛 Имя бота из ссылки: $BOT_NAME_REPO"
+
+    if [ -f "$TEMPLATE_PATH" ]; then
+      echo "🛠 Генерируем bot-repo.json из шаблона..."
+      su - deploy -c "BOT_REPO='$BOT_REPO' envsubst < $TEMPLATE_PATH > $OUTPUT_PATH"
+    else
+      echo "⚠️ Шаблон bot-repo.json.tpl не найден: $TEMPLATE_PATH"
+      echo "{\"repo\": \"$BOT_REPO\"}" > "$OUTPUT_PATH"
+    fi
+  else
+    echo "{\"repo\": \"\"}" > "$OUTPUT_PATH"
+    echo "ℹ️ bot-repo.json создан, но ссылка пуста — можно обновить позже"
+  fi
+
+  chown deploy:deploy "$OUTPUT_PATH"
+  chmod 644 "$OUTPUT_PATH"
+  echo "✅ bot-repo.json готов: $OUTPUT_PATH"
+
   if [ ! -f "$ENV_FILE" ]; then
     echo "📓 Создаём .env..."
     read -r -p "🔐 Docker Hub username: " DOCKER_USERNAME
     read -r -p "🔢 Docker image name (e.g. telegram-bot): " DOCKER_IMAGE_NAME
     DOCKER_IMAGE="$DOCKER_USERNAME/$DOCKER_IMAGE_NAME"
-    read -r -p "🤖 Telegram Bot Token (можно оставить пустым): " TELEGRAM_BOT_TOKEN
+    read -r -p "🤖 Telegram Bot Token: " TELEGRAM_BOT_TOKEN
+    read -r -p "🤖 Telegram Bot Name: " TELEGRAM_BOT_NAME
+
+    mkdir -p "$(dirname "$ENV_FILE")"
 
     echo "🖊️ Запись .env в $ENV_FILE..."
     cat <<EOF > "$ENV_FILE"
@@ -163,31 +182,57 @@ DOCKER_USERNAME=$DOCKER_USERNAME
 DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME
 DOCKER_IMAGE=$DOCKER_IMAGE
 TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+TELEGRAM_BOT_NAME="$TELEGRAM_BOT_NAME"
+REPOSITORY_NAME="$BOT_NAME_REPO"
 EOF
+    chown -R deploy:deploy "${APP_DIR}/bots"
+    chmod -R 755 "${APP_DIR}/bots"
     chown deploy:deploy "$ENV_FILE"
     chmod 600 "$ENV_FILE"
+
+    echo "🖊️ Запись общего .env в $COMMON_ENV_FILE..."
+    cat <<EOF > "$COMMON_ENV_FILE"
+KNOWN_BOTS="$BOT_SERVICE_NAME"
+BOT1_DOCKER_IMAGE=$DOCKER_IMAGE
+BOT1_REPOSITORY_NAME="$BOT_NAME_REPO"
+EOF
+    chown deploy:deploy "$COMMON_ENV_FILE"
+    chmod 600 "$COMMON_ENV_FILE"
+
+    echo "✅ .env и общий .env созданы: $ENV_FILE и $COMMON_ENV_FILE"
+
   else
     echo "📓 Обнаружен существующий .env. Проверка и обновление переменных..."
-    # shellcheck source=/home/deploy/app/.env
+    # shellcheck source=$ENV_FILE
     source "$ENV_FILE"
+
+    # shellcheck source=$COMMON_ENV_FILE
+    source "$COMMON_ENV_FILE"
 
     update_env_var() {
       local var_name="$1"
       local prompt="$2"
+      local env_file="$3"
       local current_value="${!var_name}"
+
       echo
       echo "🔍 $var_name: $current_value"
       read -r -p "$prompt (оставь пустым, чтобы не менять): " new_value
       if [[ -n "$new_value" ]]; then
-        sed -i "/^$var_name=/d" "$ENV_FILE"
-        echo "$var_name=$new_value" >> "$ENV_FILE"
+        sed -i "/^$var_name=/d" "$env_file"
+        echo "$var_name=$new_value" >> "$env_file"
       fi
     }
 
-    update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username"
-    update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)"
-    update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)"
-    update_env_var "TELEGRAM_BOT_TOKEN" "🤖 Telegram Bot Token"
+    update_env_var "DOCKER_USERNAME" "🔐 Docker Hub username" "$ENV_FILE"
+    update_env_var "DOCKER_IMAGE_NAME" "🔢 Docker image name (e.g. telegram-bot)" "$ENV_FILE"
+    update_env_var "DOCKER_IMAGE" "📦 Docker image (имя с namespace)" "$ENV_FILE"
+    update_env_var "BOT1_DOCKER_IMAGE" "📦 Docker image (имя с namespace) для первого бота" "$COMMON_ENV_FILE"
+    update_env_var "TELEGRAM_BOT_TOKEN" "🤖 Telegram Bot Token" "$ENV_FILE"
+    update_env_var "TELEGRAM_BOT_NAME" "🤖 Telegram Bot Name" "$ENV_FILE"
+    update_env_var "REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name" "$ENV_FILE"
+    update_env_var "BOT1_REPOSITORY_NAME" "🔗 Telegram bot GitHub repository name для первого бота" "$COMMON_ENV_FILE"
+    update_env_var "KNOWN_BOTS" "🔗 Список известных ботов (через запятую)" "$COMMON_ENV_FILE"
   fi
 fi
 
@@ -195,14 +240,14 @@ fi
 read -r -p "🌐 Введи домен (например: domain.com): " DOMAIN
 DOMAIN=${DOMAIN,,} # в нижний регистр
 
-NGINX_TEMPLATE="$APP_DIR/nginx/templates/default.conf.tpl"
+NGINX_TEMPLATE="$TEMPLATES_DIR/nginx.default.conf.tpl"
 NGINX_CONF="$APP_DIR/nginx/default.conf"
 
 if [ -f "$NGINX_TEMPLATE" ]; then
   echo "🛠 Генерируем nginx config из шаблона с доменом: $DOMAIN"
   export DOMAIN
-  su - deploy -c "DOMAIN='$DOMAIN' envsubst < $NGINX_TEMPLATE > $NGINX_CONF"
-  sed -i 's|__DOLLAR__host|$host|g' "$NGINX_CONF"
+  su - deploy -c "DOMAIN='$DOMAIN' BOT_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $NGINX_TEMPLATE > $NGINX_CONF"
+  sed -i 's|__DOLLAR__|$|g' "$NGINX_CONF"
   chown deploy:deploy "$NGINX_CONF"
   echo "✅ Nginx конфиг сгенерирован: $NGINX_CONF"
 else
@@ -221,7 +266,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
 
   # 📁 Пути
   HOOKS_DIR="$APP_DIR/webhook"
-  LOG_DIR="$APP_DIR/logs"
+  LOG_DIR="$BOT_DIR/logs"
 
   mkdir -p "$LOG_DIR"
   chown -R deploy:deploy "$LOG_DIR"
@@ -231,7 +276,7 @@ if [[ "$setup_webhook" =~ ^[Yy]$ ]]; then
   export WEBHOOK_SECRET="$input_secret"
 
   echo "🛠 Генерируем hooks.json из шаблона..."
-  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' envsubst < $HOOKS_DIR/hooks.json.tpl > $HOOKS_DIR/hooks.json"
+  su - deploy -c "WEBHOOK_SECRET='$WEBHOOK_SECRET' APP_DIR='$APP_DIR' BOT_DOCKER_SERVICE_NAME='$BOT_SERVICE_NAME' envsubst < $TEMPLATES_DIR/webhook.hooks.json.tpl > $HOOKS_DIR/hooks.json"
 
   # systemd unit
   echo "📦 Создаём systemd unit для webhook..."
@@ -273,12 +318,12 @@ else
 fi
 
 echo "🛠️ Проверка инициализации файлов для Docker volume mount..."
-touch /home/deploy/app/VERSION
-touch /home/deploy/app/status.json
+touch "$BOT_DIR/VERSION"
+touch "$BOT_DIR/status.json"
 touch "$LOG_DIR/deploy.log"
 
-chown deploy:deploy /home/deploy/app/VERSION
-chown deploy:deploy /home/deploy/app/status.json
+chown deploy:deploy "$BOT_DIR/VERSION"
+chown deploy:deploy "$BOT_DIR/status.json"
 chown deploy:deploy "$LOG_DIR/deploy.log"
 
 echo "✅ VERSION, status.json и deploy.log инициализированы"
