@@ -4,6 +4,7 @@ APP_DIR=$1
 BOT_DOCKER_SERVICE_NAME=$2
 
 set -a
+# shellcheck source=/dev/null
 source "$APP_DIR/bots/$BOT_DOCKER_SERVICE_NAME/.env"
 set +a
 

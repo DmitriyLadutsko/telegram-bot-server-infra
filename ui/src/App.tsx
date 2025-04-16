@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {useEffect, useState} from 'react';
+import {BotCard} from './BotCard';
+import {BotInfo} from './types';
+
+const botNames = ['bot1', 'bot2']; // Можешь менять список ботов
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [bots, setBots] = useState<BotInfo[]>([]);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    useEffect(() => {
+        Promise.all(botNames.map(async (name) => {
+            const [version, deploy, info] = await Promise.all([
+                fetch(`/api/${name}/version`).then(r => r.text()).catch(() => '—'),
+                fetch(`/api/${name}/deploy`).then(r => r.text()).catch(() => '—'),
+                fetch(`/api/${name}/bot-info`).then(r => r.json()).catch(() => ({status: 'DOWN', uptime: '—'}))
+            ]);
+
+            return {name, version, deploy, status: info.status, uptime: info.uptime};
+        })).then(setBots);
+    }, []);
+
+    return (
+        <div style={{padding: '2em', background: '#0d1117', minHeight: '100vh'}}>
+            <h1 style={{color: '#58a6ff', textAlign: 'center'}}>🤖 Telegram Bots Dashboard</h1>
+            <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}}>
+                {bots.map(bot => <BotCard key={bot.name} bot={bot}/>)}
+            </div>
+        </div>
+    );
 }
 
-export default App
+export default App;

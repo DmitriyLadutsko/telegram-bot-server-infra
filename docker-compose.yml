@@ -8,6 +8,18 @@ services:
     networks:
       - botnet
 
+  ui:
+    build: ./ui
+    container_name: ui-service
+    ports:
+      - "3000:3000"
+    environment:
+      - BOT_NAMES=${KNOWN_BOTS}
+    volumes:
+      - ./bots:/bots:ro
+    networks:
+      - botnet
+
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
