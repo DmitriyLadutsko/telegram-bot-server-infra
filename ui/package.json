@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "start": "node server.cjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "express": "^5.1.0",
