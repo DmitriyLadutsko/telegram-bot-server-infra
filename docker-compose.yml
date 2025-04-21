@@ -15,8 +15,6 @@ services:
       - "3000:3000"
     environment:
       - BOT_NAMES=${KNOWN_BOTS}
-    volumes:
-      - ./bots:/bots:ro
     networks:
       - botnet
 
@@ -31,9 +29,7 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - ./nginx/static:/usr/share/nginx/html:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./bots/bot1/VERSION:/etc/nginx/VERSION:ro
-      - ./bots/bot1/status.json:/etc/nginx/status.json:ro
-      - ./bots/bot1/logs/deploy.log:/var/log/nginx/deploy.log:ro
+      - ./bots:/etc/nginx/bots:ro
       - ./logs:/var/log/nginx
 #    depends_on:
 #      - bot
