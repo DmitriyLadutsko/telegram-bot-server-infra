@@ -15,6 +15,9 @@ services:
       - "3000:3000"
     environment:
       - BOT_NAMES=${KNOWN_BOTS}
+    depends_on:
+      - bot
+      - nginx
     networks:
       - botnet
 

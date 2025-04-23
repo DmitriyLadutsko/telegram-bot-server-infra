@@ -62,13 +62,13 @@ server {
     }
 
     location = /version {
-        alias /etc/nginx/VERSION;
+        alias /etc/nginx/bots/bot1/VERSION;
         default_type text/plain;
         add_header Cache-Control "no-cache";
     }
 
     location = /status {
-        alias /etc/nginx/status.json;
+        alias /etc/nginx/bots/bot1/status.json;
         default_type application/json;
         add_header Cache-Control "no-cache";
     }
@@ -81,7 +81,7 @@ server {
         }
 
     location = /deploy {
-        alias /var/log/nginx/deploy.log;
+        alias /etc/nginx/bots/bot1/logs/deploy.log;
         default_type text/plain;
         add_header Cache-Control "no-cache";
     }
