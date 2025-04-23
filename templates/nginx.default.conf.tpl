@@ -49,6 +49,16 @@ server {
         proxy_set_header Host __DOLLAR__host;
     }
 
+    # 🔄 Прокси запросов к лог-серверу
+    location /logs/ws {
+        proxy_pass http://log-server:8090;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade __DOLLAR__http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host __DOLLAR__host;
+    }
+
     # 📦 Статика
     location / {
         root /usr/share/nginx/html;
