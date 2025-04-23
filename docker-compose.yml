@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./bots/bot1/.env
+    volumes:
+      - ./bots/bot1/logs:/logs
     networks:
       - botnet
 
@@ -20,6 +22,15 @@ services:
       - nginx
     networks:
       - botnet
+
+  log-server:
+    build: ./log-server
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./bots:/bots:ro
+    environment:
+      - LOGS_ROOT=/bots
 
   nginx:
     image: nginx:latest
