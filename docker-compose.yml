@@ -6,22 +6,22 @@ services:
     env_file:
       - ./bots/bot1/.env
     volumes:
-      - ./bots/bot1/logs:/logs
+      - ./bots/bot1/logs:/app/logs
     networks:
       - botnet
 
-  ui:
-    build: ./ui
-    container_name: ui-service
-    ports:
-      - "3000:3000"
-    environment:
-      - BOT_NAMES=${KNOWN_BOTS}
-    depends_on:
-      - bot
-      - nginx
-    networks:
-      - botnet
+#  ui:
+#    build: ./ui
+#    container_name: ui-service
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - BOT_NAMES=${KNOWN_BOTS}
+#    depends_on:
+#      - bot
+#      - nginx
+#    networks:
+#      - botnet
 
   log-server:
     build: ./log-server
@@ -29,6 +29,8 @@ services:
       - "8090:8090"
     volumes:
       - ./bots:/bots:ro
+    networks:
+      - botnet
     environment:
       - LOGS_ROOT=/bots
 
