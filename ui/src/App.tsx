@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
-import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline';
+import BurgerIcon from './components/BurgerIcon.tsx';
 
 const knownBots: string[] = (import.meta.env.VITE_KNOWN_BOTS ?? '')
     .split(',')
@@ -47,16 +47,10 @@ const App = () => {
     }, [selectedBot]);
 
     return (
-        <div className="relative min-h-screen flex bg-neutral-900 text-white">
-            {!sidebarOpen && (
-                <button
-                    onClick={() => setSidebarOpen(true)}
-                    className="absolute top-4 left-0 text-gray-400 hover:text-white hover:bg-neutral-700 p-2 rounded-full transition-colors z-50 cursor-pointer"
-                >
-                    <Bars3Icon
-                        className="h-6 w-6 transform transition-transform duration-300 hover:rotate-180 hover:scale-110"/>
-                </button>
-            )}
+        <div className="relative min-h-screen flex">
+            <div className="absolute top-4 left-2">
+                <BurgerIcon isOpen={sidebarOpen} onClick={() => setSidebarOpen(!sidebarOpen)}/>
+            </div>
 
             <div
                 className={clsx(
@@ -65,21 +59,14 @@ const App = () => {
                 )}
             >
                 {sidebarOpen && (
-                    <>
-                        <button
-                            onClick={() => setSidebarOpen(false)}
-                            className="self-end text-gray-400 hover:text-white hover:bg-neutral-700 p-2 rounded-full transition-colors cursor-pointer"
-                        >
-                            <XMarkIcon
-                                className="h-6 w-6 transform transition-transform duration-300 hover:rotate-180"/>
-                        </button>
+                    <div className="pt-10">
                         <h2 className="text-xl font-bold mb-4">Bots information (planned)</h2>
                         <ul className="space-y-2">
                             {knownBots.map((bot) => (
                                 <li key={bot}>{bot}</li>
                             ))}
                         </ul>
-                    </>
+                    </div>
                 )}
             </div>
 
@@ -94,7 +81,7 @@ const App = () => {
                         value={selectedBot}
                         onChange={(e) => setSelectedBot(e.target.value)}
                         className={clsx(
-                            'w-[30%] min-w-[350px] mb-6 p-2 border rounded bg-neutral-800 text-white',
+                            'w-[30%] min-w-[350px] mb-6 p-2 border rounded bg-neutral-800',
                             'focus:outline-none focus:ring focus:border-blue-500'
                         )}
                     >
@@ -106,7 +93,7 @@ const App = () => {
                     </select>
 
                     <div
-                        className="flex-1 bg-black text-green-400 p-6 rounded-lg font-mono overflow-auto whitespace-pre-wrap border border-neutral-700 shadow-lg"
+                        className="flex-1 bg-neutral-800 text-green-400 p-6 rounded-lg font-mono overflow-auto whitespace-pre-wrap border border-neutral-700 shadow-lg"
                         style={{maxHeight: '85vh'}}
                     >
                         {logLines.map((line, index) => (
