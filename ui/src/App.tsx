@@ -63,7 +63,7 @@ const App = () => {
                         value={selectedBot}
                         onChange={(e) => setSelectedBot(e.target.value)}
                         className={clsx(
-                            'mb-6 p-2 border rounded bg-neutral-800 text-white',
+                            'w-[30%] mb-6 p-2 border rounded bg-neutral-800 text-white',
                             'focus:outline-none focus:ring focus:border-blue-500'
                         )}
                     >
