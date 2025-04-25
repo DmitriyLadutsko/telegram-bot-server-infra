@@ -48,7 +48,7 @@ const App = () => {
 
     return (
         <div className="relative min-h-screen flex">
-            <div className="absolute top-4 left-2">
+            <div className="absolute top-6 left-2">
                 <BurgerIcon isOpen={sidebarOpen} onClick={() => setSidebarOpen(!sidebarOpen)}/>
             </div>
 
@@ -59,7 +59,7 @@ const App = () => {
                 )}
             >
                 {sidebarOpen && (
-                    <div className="pt-10">
+                    <div className="pt-14">
                         <h2 className="text-xl font-bold mb-4">Bots information (planned)</h2>
                         <ul className="space-y-2">
                             {knownBots.map((bot) => (
