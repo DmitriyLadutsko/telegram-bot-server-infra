@@ -49,7 +49,6 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./nginx/static:/usr/share/nginx/html:ro
-      - ./ui/dist:/usr/share/nginx/html/logs-ui:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./bots:/etc/nginx/bots:ro
       - ./logs:/var/log/nginx
