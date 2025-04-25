@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
+import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline';
 
 const knownBots: string[] = (import.meta.env.VITE_KNOWN_BOTS ?? '')
     .split(',')
@@ -9,6 +10,7 @@ const knownBots: string[] = (import.meta.env.VITE_KNOWN_BOTS ?? '')
 const App = () => {
     const [selectedBot, setSelectedBot] = useState(knownBots[0]);
     const [logLines, setLogLines] = useState<string[]>([]);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -45,25 +47,54 @@ const App = () => {
     }, [selectedBot]);
 
     return (
-        <div className="min-h-screen flex bg-neutral-900 text-white">
-            <aside className="w-64 bg-neutral-800 p-4">
-                <h2 className="text-xl font-bold mb-4">Bots information (planed)</h2>
-                <ul className="space-y-2">
-                    {knownBots.map((bot) => (
-                        <li key={bot}>{bot}</li>
-                    ))}
-                </ul>
-            </aside>
+        <div className="relative min-h-screen flex bg-neutral-900 text-white">
+            {!sidebarOpen && (
+                <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="absolute top-4 left-0 text-gray-400 hover:text-white hover:bg-neutral-700 p-2 rounded-full transition-colors z-50 cursor-pointer"
+                >
+                    <Bars3Icon
+                        className="h-6 w-6 transform transition-transform duration-300 hover:rotate-180 hover:scale-110"/>
+                </button>
+            )}
+
+            <div
+                className={clsx(
+                    'bg-neutral-800 p-4 flex flex-col transition-all duration-300 ease-in-out',
+                    sidebarOpen ? 'w-64 opacity-100' : 'w-0 opacity-0 overflow-hidden'
+                )}
+            >
+                {sidebarOpen && (
+                    <>
+                        <button
+                            onClick={() => setSidebarOpen(false)}
+                            className="self-end text-gray-400 hover:text-white hover:bg-neutral-700 p-2 rounded-full transition-colors cursor-pointer"
+                        >
+                            <XMarkIcon
+                                className="h-6 w-6 transform transition-transform duration-300 hover:rotate-180"/>
+                        </button>
+                        <h2 className="text-xl font-bold mb-4">Bots information (planned)</h2>
+                        <ul className="space-y-2">
+                            {knownBots.map((bot) => (
+                                <li key={bot}>{bot}</li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
 
             <main className="flex-1 flex flex-col items-end p-6">
-                <div className="w-full min-w-[100%] max-w-6xl flex flex-col">
+                <div className={clsx(
+                    'flex flex-col w-full transition-all duration-300 ease-in-out',
+                    sidebarOpen ? 'min-w-[100%] max-w-6xl self-end' : 'w-full'
+                )}>
                     <h1 className="text-3xl font-bold mb-4">Live Logs</h1>
 
                     <select
                         value={selectedBot}
                         onChange={(e) => setSelectedBot(e.target.value)}
                         className={clsx(
-                            'w-[30%] mb-6 p-2 border rounded bg-neutral-800 text-white',
+                            'w-[30%] min-w-[350px] mb-6 p-2 border rounded bg-neutral-800 text-white',
                             'focus:outline-none focus:ring focus:border-blue-500'
                         )}
                     >
