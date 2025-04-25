@@ -24,7 +24,7 @@
 /ui/lerna-debug.log*
 
 **/node_modules
-/ui/dist
+**/dist
 /ui/dist-ssr
 /ui/*.local
 

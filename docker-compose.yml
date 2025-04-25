@@ -10,29 +10,34 @@ services:
     networks:
       - botnet
 
-#  ui:
-#    build: ./ui
-#    container_name: ui-service
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      - BOT_NAMES=${KNOWN_BOTS}
-#    depends_on:
-#      - bot
-#      - nginx
-#    networks:
-#      - botnet
-
   log-server:
     build: ./log-server
     ports:
       - "8090:8090"
     volumes:
       - ./bots:/bots:ro
+    depends_on:
+      - bot1
     networks:
       - botnet
     environment:
       - LOGS_ROOT=/bots
+
+  log-ui:
+    build:
+      context: ./ui
+      args:
+        VITE_KNOWN_BOTS: ${KNOWN_BOTS}
+    container_name: logs-ui
+    restart: unless-stopped
+#    depends_on:
+#      - bot1
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    networks:
+      - botnet
 
   nginx:
     image: nginx:latest
@@ -44,6 +49,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./nginx/static:/usr/share/nginx/html:ro
+      - ./ui/dist:/usr/share/nginx/html/logs-ui:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./bots:/etc/nginx/bots:ro
       - ./logs:/var/log/nginx

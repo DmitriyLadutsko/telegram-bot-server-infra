@@ -1,16 +1,21 @@
-# Build stage
-FROM node:18 AS build
-WORKDIR /app
-COPY . .
-RUN npm install && npm run build
+# 🛠 Stage 1: сборка Vite-приложения
+FROM node:23-alpine3.20
 
-# Run stage
-FROM node:18-alpine
 WORKDIR /app
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/server.js ./
-COPY --from=build /app/bots ./bots
-RUN npm install express http-proxy-middleware
+
+ARG VITE_KNOWN_BOTS
+ENV VITE_KNOWN_BOTS=$VITE_KNOWN_BOTS
+
+COPY package.json .
+COPY package-lock.json .
+
+RUN npm install \
+&& npm i -g serve
+
+COPY . .
+
+RUN npm run build -- --mode production
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+
+CMD [ "serve", "-s", "dist" ]

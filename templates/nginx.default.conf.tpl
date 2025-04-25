@@ -65,6 +65,20 @@ server {
         index index.html;
     }
 
+    # 📦 Статика для LOG-UI
+    location /logs/ {
+        proxy_pass http://logs-ui:3000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Прокидываем вебсокеты, если будут
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
+
     location = /favicon.ico {
         root /usr/share/nginx/html;
         access_log off;
