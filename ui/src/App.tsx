@@ -45,32 +45,45 @@ const App = () => {
     }, [selectedBot]);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-start p-6 bg-neutral-900 text-white">
-            <h1 className="text-3xl font-bold mb-4">Live Logs</h1>
+        <div className="min-h-screen flex bg-neutral-900 text-white">
+            <aside className="w-64 bg-neutral-800 p-4">
+                <h2 className="text-xl font-bold mb-4">Bots information (planed)</h2>
+                <ul className="space-y-2">
+                    {knownBots.map((bot) => (
+                        <li key={bot}>{bot}</li>
+                    ))}
+                </ul>
+            </aside>
 
-            <select
-                value={selectedBot}
-                onChange={(e) => setSelectedBot(e.target.value)}
-                className={clsx(
-                    'mb-6 p-2 border rounded bg-neutral-800 text-white',
-                    'focus:outline-none focus:ring focus:border-blue-500'
-                )}
-            >
-                {knownBots.map((bot) => (
-                    <option key={bot} value={bot}>
-                        {bot}
-                    </option>
-                ))}
-            </select>
+            <main className="flex-1 flex flex-col items-end p-6">
+                <div className="w-full min-w-[90%] max-w-6xl flex flex-col">
+                    <h1 className="text-3xl font-bold mb-4">Live Logs</h1>
 
-            <div
-                className="flex-1 w-full min-w-[70%] max-w-6xl bg-black text-green-400 p-6 rounded-lg font-mono overflow-auto whitespace-pre-wrap border border-neutral-700 shadow-lg"
-                style={{maxHeight: '80vh'}}
-            >
-                {logLines.map((line, index) => (
-                    <div key={`${index}-${crypto.randomUUID()}`}>{line}</div>
-                ))}
-            </div>
+                    <select
+                        value={selectedBot}
+                        onChange={(e) => setSelectedBot(e.target.value)}
+                        className={clsx(
+                            'mb-6 p-2 border rounded bg-neutral-800 text-white',
+                            'focus:outline-none focus:ring focus:border-blue-500'
+                        )}
+                    >
+                        {knownBots.map((bot) => (
+                            <option key={bot} value={bot}>
+                                {bot}
+                            </option>
+                        ))}
+                    </select>
+
+                    <div
+                        className="flex-1 bg-black text-green-400 p-6 rounded-lg font-mono overflow-auto whitespace-pre-wrap border border-neutral-700 shadow-lg"
+                        style={{maxHeight: '85vh'}}
+                    >
+                        {logLines.map((line, index) => (
+                            <div key={`${index}-${crypto.randomUUID()}`}>{line}</div>
+                        ))}
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };
