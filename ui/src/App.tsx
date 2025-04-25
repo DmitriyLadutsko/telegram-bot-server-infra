@@ -56,7 +56,7 @@ const App = () => {
             </aside>
 
             <main className="flex-1 flex flex-col items-end p-6">
-                <div className="w-full min-w-[90%] max-w-6xl flex flex-col">
+                <div className="w-full min-w-[100%] max-w-6xl flex flex-col">
                     <h1 className="text-3xl font-bold mb-4">Live Logs</h1>
 
                     <select
