@@ -1,15 +1,40 @@
 /.idea/
-.env
-deploy.log
 /logs/
 /certs/
 /webhook/node_modules/
 /webhook/logs/
 /webhook/hooks.json
 
-status.json
-VERSION
 /nginx/default.conf
 /nginx/static/bot-repo.json
 
+/bots/
+
+.env
+
 **/.DS_Store
+
+# Logs
+/ui/logs
+/ui/*.log
+/ui/npm-debug.log*
+/ui/yarn-debug.log*
+/ui/yarn-error.log*
+/ui/pnpm-debug.log*
+/ui/lerna-debug.log*
+
+**/node_modules
+**/dist
+/ui/dist-ssr
+/ui/*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

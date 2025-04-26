@@ -1,10 +1,41 @@
 services:
-  bot:
-    image: ${DOCKER_IMAGE}:latest
-    container_name: ${DOCKER_IMAGE_NAME}
+  bot1:
+    image: ${BOT1_DOCKER_IMAGE}:latest
+    container_name: ${BOT1_REPOSITORY_NAME}-bot1
     restart: unless-stopped
+    env_file:
+      - ./bots/bot1/.env
+    volumes:
+      - ./bots/bot1/logs:/app/logs
+    networks:
+      - botnet
+
+  log-server:
+    build: ./log-server
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./bots:/bots:ro
+    depends_on:
+      - bot1
+    networks:
+      - botnet
     environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - LOGS_ROOT=/bots
+
+  log-ui:
+    build:
+      context: ./ui
+      args:
+        VITE_KNOWN_BOTS: ${KNOWN_BOTS}
+    container_name: logs-ui
+    restart: unless-stopped
+    depends_on:
+      - bot1
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
     networks:
       - botnet
 
@@ -19,9 +50,7 @@ services:
       - ./nginx:/etc/nginx/conf.d
       - ./nginx/static:/usr/share/nginx/html:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./VERSION:/etc/nginx/VERSION:ro
-      - ./status.json:/etc/nginx/status.json:ro
-      - ./logs/deploy.log:/var/log/nginx/deploy.log:ro
+      - ./bots:/etc/nginx/bots:ro
       - ./logs:/var/log/nginx
 #    depends_on:
 #      - bot

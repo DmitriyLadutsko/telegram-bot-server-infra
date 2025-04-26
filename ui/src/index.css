@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+body {
+    @apply bg-neutral-900 text-gray-300 font-sans;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    @apply text-white font-bold;
+}
+
+a {
+    @apply text-blue-400 hover:text-blue-500 transition-colors;
+}
+
+button {
+    @apply focus:outline-none text-gray-400 hover:bg-neutral-700 hover:text-white;
+}
+
+button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+}

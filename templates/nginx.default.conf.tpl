@@ -1,7 +1,7 @@
 server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
-    return 301 https://$host$request_uri;
+    return 301 https://__DOLLAR__host__DOLLAR__request_uri;
 }
 
 server {
@@ -34,20 +34,28 @@ server {
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
     # 🔁 Прокси запросов к вебхуку или другому сервису
-    location /github-webhook {
-        allow 192.30.252.0/22;
-        allow 185.199.108.0/22;
-        allow 140.82.112.0/20;
-        allow 143.55.64.0/20;
-        deny all;
+    location ~ ^/github-webhook/deploy/(.+)__DOLLAR__ {
+        include /etc/nginx/conf.d/github-ips;
 
-        proxy_pass http://172.17.0.1:9000/hooks/deploy;
+        set __DOLLAR__dockerservicename __DOLLAR__1;
+
+        proxy_pass http://172.17.0.1:9000/hooks/deploy-__DOLLAR__dockerservicename;
         proxy_set_header Host __DOLLAR__host;
     }
 
     # 🔄 Прокси запросов к боту
     location /health {
-        proxy_pass http://telegram-bot:8080/actuator/health;
+        proxy_pass http://$BOT_SERVICE_NAME:8080/actuator/health;
+        proxy_set_header Host __DOLLAR__host;
+    }
+
+    # 🔄 Прокси запросов к лог-серверу
+    location /logs/ws {
+        proxy_pass http://log-server:8090;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade __DOLLAR__http_upgrade;
+        proxy_set_header Connection "Upgrade";
         proxy_set_header Host __DOLLAR__host;
     }
 
@@ -57,6 +65,20 @@ server {
         index index.html;
     }
 
+    # 📦 Статика для LOG-UI
+    location /logs/ {
+        proxy_pass http://logs-ui:3000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Прокидываем вебсокеты, если будут
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
+
     location = /favicon.ico {
         root /usr/share/nginx/html;
         access_log off;
@@ -64,13 +86,13 @@ server {
     }
 
     location = /version {
-        alias /etc/nginx/VERSION;
+        alias /etc/nginx/bots/bot1/VERSION;
         default_type text/plain;
         add_header Cache-Control "no-cache";
     }
 
     location = /status {
-        alias /etc/nginx/status.json;
+        alias /etc/nginx/bots/bot1/status.json;
         default_type application/json;
         add_header Cache-Control "no-cache";
     }
@@ -83,7 +105,7 @@ server {
         }
 
     location = /deploy {
-        alias /var/log/nginx/deploy.log;
+        alias /etc/nginx/bots/bot1/logs/deploy.log;
         default_type text/plain;
         add_header Cache-Control "no-cache";
     }
