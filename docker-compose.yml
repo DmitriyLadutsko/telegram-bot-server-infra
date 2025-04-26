@@ -30,8 +30,8 @@ services:
         VITE_KNOWN_BOTS: ${KNOWN_BOTS}
     container_name: logs-ui
     restart: unless-stopped
-#    depends_on:
-#      - bot1
+    depends_on:
+      - bot1
     environment:
       NODE_ENV: production
     ports:
