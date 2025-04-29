@@ -59,6 +59,13 @@ server {
         proxy_set_header Host __DOLLAR__host;
     }
 
+    # 🔄 Прокси запросов к grafana
+    location /dashboard/ {
+        proxy_pass http://grafana:3000/;
+        proxy_set_header Host __DOLLAR__host;
+        proxy_set_header X-Real-IP __DOLLAR__remote_addr;
+    }
+
     # 📦 Статика
     location / {
         root /usr/share/nginx/html;

@@ -32,6 +32,7 @@ services:
     restart: unless-stopped
     depends_on:
       - bot1
+      - log-server
     environment:
       NODE_ENV: production
     ports:
@@ -52,8 +53,37 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./bots:/etc/nginx/bots:ro
       - ./logs:/var/log/nginx
-#    depends_on:
-#      - bot
+    depends_on:
+      - grafana
+      - prometheus
+    networks:
+      - botnet
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - botnet
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    networks:
+      - botnet
+
+  # Node Exporter (для метрик самого сервера)
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
     networks:
       - botnet
 
