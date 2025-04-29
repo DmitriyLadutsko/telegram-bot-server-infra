@@ -1,9 +1,12 @@
-FROM node:18
+FROM node:23-alpine3.20 AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
+
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev
+
 COPY . .
+
 EXPOSE 8090
 
 CMD ["node", "index.js"]

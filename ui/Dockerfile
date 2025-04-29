@@ -6,8 +6,7 @@ WORKDIR /app
 ARG VITE_KNOWN_BOTS
 ENV VITE_KNOWN_BOTS=$VITE_KNOWN_BOTS
 
-COPY package.json .
-COPY package-lock.json .
+COPY package*.json .
 
 RUN npm ci
 
