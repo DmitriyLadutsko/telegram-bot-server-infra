@@ -164,4 +164,22 @@ This infra is designed to work with: 👉 [telegram-bot-template](https://github
 
 ---
 
+## 📚 Документация
+
+- [Руководство по Docker Swarm](docs/swarm-guide.md)
+
+---
+
+## 🔗 Полезные ссылки
+- [Docker](https://docs.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [GitHub Actions](https://docs.github.com/en/actions)
+- [GitHub IPs](https://api.github.com/meta)
+- [GitHub Webhook](https://docs.github.com/en/developers/webhooks-and-events/webhooks/creating-webhooks)
+- [Webhook](https://github.com/adnanh/webhook)
+- [Certbot](https://certbot.eff.org/)
+- [Cloudflare API](https://api.cloudflare.com/)
+
+---
+
 Happy deploying! 🎉
