@@ -19,7 +19,12 @@ if ! command -v sudo &> /dev/null; then
 fi
 
 # === Очистка не-Swarm контейнеров
-OLD_CONTAINERS=$(docker ps -a --filter "label!=com.docker.swarm.service.name" --format '{{.ID}} {{.Names}}')
+OLD_CONTAINERS=$(docker ps -a --format '{{.ID}} {{.Names}}' | while read -r id name; do
+  IS_SWARM=$(docker inspect -f '{{ index .Config.Labels "com.docker.swarm.service.name" }}' "$id" 2>/dev/null || true)
+  if [ -z "$IS_SWARM" ]; then
+    echo "$id $name"
+  fi
+done)
 
 if [ -z "$OLD_CONTAINERS" ]; then
   echo "✅ Нет контейнеров, не относящихся к Swarm."
