@@ -10,8 +10,6 @@ services:
     command:
       - "--api.insecure=true"
       - "--api.dashboard=true"
-      - "--providers.docker=true"
-      - "--providers.docker.swarmMode=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
