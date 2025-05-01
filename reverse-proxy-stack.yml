@@ -30,7 +30,7 @@ services:
     secrets:
       - cloudflare_api_token
     networks:
-        - botnet
+        - traefik
     deploy:
       placement:
         constraints:
@@ -55,7 +55,7 @@ services:
     # A container that exposes an API to show its IP address
     image: traefik/whoami
     networks:
-      - botnet
+      - traefik
     deploy:
         placement:
             constraints:
