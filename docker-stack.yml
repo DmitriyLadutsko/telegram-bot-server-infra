@@ -35,21 +35,21 @@ services:
       placement:
         constraints:
           - node.role == manager
-      labels:
-          - "traefik.enable=true"
-          - "traefik.http.routers.api.rule=Host(`traefik.4lad.dev`)"
-          - "traefik.http.routers.api.entrypoints=websecure"
-          - "traefik.http.routers.api.service=api@internal"
-          - "traefik.http.routers.api.tls.certresolver=cloudflare"
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.api.rule=Host(`traefik.4lad.dev`)"
+        - "traefik.http.routers.api.entrypoints=websecure"
+        - "traefik.http.routers.api.service=api@internal"
+        - "traefik.http.routers.api.tls.certresolver=cloudflare"
 
-          # 🔁 Middleware для редиректа
-          - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-          - "traefik.http.routers.http-catch.rule=HostRegexp(`{host:.+}`)"
-          - "traefik.http.routers.http-catch.entrypoints=web"
-          - "traefik.http.routers.http-catch.middlewares=redirect-to-https"
-          - "traefik.http.routers.http-catch.priority=1"
-          - "traefik.http.routers.http-catch.service=dummy"
-          - "traefik.http.services.dummy.loadbalancer.server.port=9999"
+        # 🔁 Middleware для редиректа
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - "traefik.http.routers.http-catch.rule=HostRegexp(`{host:.+}`)"
+        - "traefik.http.routers.http-catch.entrypoints=web"
+        - "traefik.http.routers.http-catch.middlewares=redirect-to-https"
+        - "traefik.http.routers.http-catch.priority=1"
+        - "traefik.http.routers.http-catch.service=dummy"
+        - "traefik.http.services.dummy.loadbalancer.server.port=9999"
 
   whoami:
     # A container that exposes an API to show its IP address
