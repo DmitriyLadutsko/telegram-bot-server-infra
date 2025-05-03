@@ -2,11 +2,10 @@ version: '3.8'
 
 services:
   reverse-proxy:
-    # The official v3 Traefik docker image
     image: traefik:v3.3
-    # Enables the web UI and tells Traefik to listen to docker
     environment:
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
+    # Enables the web UI and tells Traefik to listen to docker
     command:
       - "--api.insecure=true"
       - "--api.dashboard=true"

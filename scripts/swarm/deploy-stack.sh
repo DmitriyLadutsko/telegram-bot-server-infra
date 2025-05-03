@@ -24,6 +24,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(realpath "$SCRIPT_DIR/..")"
 cd "$PROJECT_ROOT"
 
+set -a
+source .env
+set +a
+
 # Имя стека передаётся аргументом, по умолчанию — mystack
 STACK_NAME=${1:-mystack}
 
