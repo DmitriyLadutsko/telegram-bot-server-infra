@@ -1,0 +1,25 @@
+version: "3.8"
+
+networks:
+  botnet:
+    driver: overlay
+  monitor:
+    external: true
+
+services:
+  bot1:
+    image: ${BOT1_DOCKER_IMAGE}
+    env_file:
+      - ./bots/bot1/.env
+    volumes:
+      - ./bots/bot1/logs:/app/logs
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - botnet
+      - monitor

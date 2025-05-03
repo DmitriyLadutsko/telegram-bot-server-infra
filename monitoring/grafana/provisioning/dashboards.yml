@@ -1,0 +1,29 @@
+apiVersion: 1
+
+providers:
+  - name: Infrastructure
+    orgId: 1
+    folder: Infrastructure
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/infrastructure
+
+  - name: Bots
+    orgId: 1
+    folder: Bots
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/bots
+
+#  - name: Traffic
+#    orgId: 1
+#    folder: Traffic
+#    type: file
+#    disableDeletion: false
+#    editable: true
+#    options:
+#      path: /etc/grafana/provisioning/dashboards/traffic
