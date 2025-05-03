@@ -25,10 +25,7 @@ set -a
 source $APP_DIR/.env
 set +a
 
-# Имя стека передаётся аргументом, по умолчанию — mystack
-STACK_NAME=${1:-mystack}
-
-echo "🚀 Деплой стека '$STACK_NAME' ..."
+echo "🚀 Деплой стека ..."
 
 # List all available stack files
 STACK_FILES=("$APP_DIR"/*-stack.yml)

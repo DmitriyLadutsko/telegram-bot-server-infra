@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  reverse-proxy:
+  traefik:
     image: traefik:v3.3
     environment:
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
@@ -17,6 +17,9 @@ services:
       - "--certificatesresolvers.cloudflare.acme.dnschallenge.delaybeforecheck=0"
       - "--certificatesresolvers.cloudflare.acme.email=dima.ladut@gmail.com"
       - "--certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addRoutersLabels=true"
     ports:
       - "80:80"
       - "443:443"
