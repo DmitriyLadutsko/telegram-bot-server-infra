@@ -20,16 +20,14 @@ set -e
 # ---------------------------------------------
 
 # Переход в корень проекта (относительно текущего скрипта)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(realpath "$SCRIPT_DIR/..")"
-cd "$PROJECT_ROOT"
+APP_DIR=/home/deploy/app
 
 set -a
-source .env
+source $APP_DIR/.env
 set +a
 
 # Имя стека передаётся аргументом, по умолчанию — mystack
 STACK_NAME=${1:-mystack}
 
 echo "🚀 Деплой стека '$STACK_NAME' из директории: $PROJECT_ROOT ..."
-docker stack deploy -c docker-stack.yml "$STACK_NAME"
+docker stack deploy -c $APP_DIR/reverse-proxy-stack.yml "$STACK_NAME"
