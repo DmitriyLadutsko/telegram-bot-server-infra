@@ -14,3 +14,4 @@ docker node update --label-add traefik-public.traefik-public-certificates=true "
 # Проверка
 echo "✅ Метки на '$NODE_HOSTNAME':"
 docker node inspect "$NODE_HOSTNAME" --format '{{ .Spec.Labels }}'
+

@@ -38,3 +38,4 @@ echo
 echo "✅ Добавь это в .env:"
 echo "TRAEFIK_ADMIN_USER=$USERNAME"
 echo "TRAEFIK_HASHED_PASSWORD=${HASHED_LINE#"$USERNAME:"}"
+
