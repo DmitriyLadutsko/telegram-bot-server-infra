@@ -12,7 +12,7 @@ services:
         mode: host
 
       # traefik ui
-#      - '8080:8080'
+      - '8080:8080'
 
     volumes:
       # So that Traefik can listen to the Docker events
