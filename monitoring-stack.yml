@@ -52,15 +52,15 @@ services:
       placement:
         constraints:
           - node.role == manager
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.constraint-label=traefik-public"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
 
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.prometheus.entrypoints=https"
-      - "traefik.http.routers.prometheus.tls.certresolver=le"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+        - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.prometheus.entrypoints=https"
+        - "traefik.http.routers.prometheus.tls.certresolver=le"
+        - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 #
 #  node-exporter:
 #    image: prom/node-exporter:latest
