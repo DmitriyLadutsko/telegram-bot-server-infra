@@ -10,6 +10,10 @@ services:
       - target: 443
         published: 443
         mode: host
+
+      # traefik ui
+      - '9004:9004'
+
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -32,14 +36,14 @@ services:
 
         # Redirect HTTP to HTTPS
         - traefik.http.routers.traefik-public-http.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
-        - traefik.http.routers.traefik-public-http.entrypoints=http
+        - traefik.http.routers.traefik-public-http.entrypoints=traefik-ui
         - traefik.http.routers.traefik-public-http.middlewares=https-redirect
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
         # HTTPS Traefik Dashboard with auth
         - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
-        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.entrypoints=traefik-ui
         - traefik.http.routers.traefik-public-https.service=api@internal
         - traefik.http.routers.traefik-public-https.tls=true
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
@@ -66,6 +70,9 @@ services:
       - --accesslog.filepath=/var/log/traefik/traefik-access.log
       - --log
       - --api
+
+      # SMDM entrypoints additional services
+      - --entrypoints.traefik-ui.address=:9004
 
       - --metrics.prometheus=true
       - --metrics.prometheus.addEntryPointsLabels=true
