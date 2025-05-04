@@ -21,6 +21,7 @@ services:
       - ./logs/traefik:/var/log/traefik
     secrets:
       - cloudflare_api_token
+      - traefik_basic_auth
     environment:
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
 
