@@ -105,7 +105,7 @@ services:
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
-        - "traefik.http.routers.whoami-https.rule=Host(`whoami.${DOMAIN_NAME}`, `www.whoami.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.whoami-https.rule=Host(`whoami.${DOMAIN_NAME}`) || Host(`www.whoami.${DOMAIN_NAME}`)"
         - "traefik.http.routers.whoami-https.middlewares=non-www-to-www"
 
         - "traefik.http.routers.whoami-https.entrypoints=https"
