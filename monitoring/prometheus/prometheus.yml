@@ -20,8 +20,8 @@ scrape_configs:
     static_configs:
       - targets: ['reverse-proxy_traefik:8080']
 
-#  - job_name: 'bots'
-#    metrics_path: /actuator/prometheus
-#    static_configs:
-#      - targets:
-#          - 'bots_bot1:8080'
+  - job_name: 'bots'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - 'bots_bot1:8080'
