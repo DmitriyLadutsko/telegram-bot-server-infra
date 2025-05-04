@@ -51,4 +51,4 @@ SELECTED_STACK_FILE=${STACK_FILES[$((STACK_INDEX - 1))]}
 STACK_NAME=$(basename "$SELECTED_STACK_FILE" -stack.yml)
 
 echo "🚀 Deploying stack '$STACK_NAME' from file: $SELECTED_STACK_FILE ..."
-docker stack deploy -c "$SELECTED_STACK_FILE" "$STACK_NAME"
+docker stack deploy --detach=false -c "$SELECTED_STACK_FILE" "$STACK_NAME"
