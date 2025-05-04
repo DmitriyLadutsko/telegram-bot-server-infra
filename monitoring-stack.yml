@@ -78,3 +78,18 @@ services:
       mode: global
       restart_policy:
         condition: on-failure
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitor
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
