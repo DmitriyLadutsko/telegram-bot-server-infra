@@ -15,7 +15,7 @@ services:
     image: grafana/grafana:latest
     volumes:
       - grafana_data:/var/lib/grafana
-#      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     env_file:
       - ./monitoring/grafana/config.monitoring
     environment:
