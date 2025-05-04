@@ -12,7 +12,7 @@ services:
         mode: host
 
       # traefik ui
-      - '8080:8080'
+#      - '8080:8080'
 
     volumes:
       # So that Traefik can listen to the Docker events
@@ -42,10 +42,9 @@ services:
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
         # HTTPS Traefik Dashboard with auth
-        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
+        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`, `www.traefik.${DOMAIN_NAME?Variable not set}`)
         - traefik.http.routers.traefik-public-https.entrypoints=https
         - traefik.http.routers.traefik-public-https.service=api@internal
-#        - traefik.http.routers.traefik-public-https.tls=true
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
 #        - traefik.http.routers.traefik-public-https.middlewares=admin-auth
 
@@ -53,6 +52,11 @@ services:
 
         # Basic auth middleware
 #        - traefik.http.middlewares.admin-auth.basicauth.users=${TRAEFIK_ADMIN_USER}:${TRAEFIK_HASHED_PASSWORD}
+
+        # Redirect non-www to www
+        - "traefik.http.middlewares.non-www-to-www.redirectregex.regex=^https?://(?:www\\.)?(.+)"
+        - "traefik.http.middlewares.non-www-to-www.redirectregex.permanent=true"
+        - "traefik.http.middlewares.non-www-to-www.redirectregex.replacement=https://www.$${1}"
 
       update_config:
         order: stop-first
@@ -100,14 +104,13 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
-#        - "traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN_NAME}`)"
-#        - "traefik.http.routers.whoami.entrypoints=http"
-#        - "traefik.http.routers.whoami.middlewares=https-redirect"
-        - "traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN_NAME}`)"
-        - "traefik.http.routers.whoami.entrypoints=https"
-#        - "traefik.http.routers.whoami-https.tls=true"
-        - "traefik.http.routers.whoami.tls.certresolver=le"
-        - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
+        - "traefik.http.routers.whoami-https.rule=Host(`whoami.${DOMAIN_NAME}`, `www.whoami.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.whoami-https.middlewares=non-www-to-www"
+
+        - "traefik.http.routers.whoami-https.entrypoints=https"
+        - "traefik.http.routers.whoami-https.tls.certresolver=le"
+        - "traefik.http.services.whoami-https.loadbalancer.server.port=80"
 
 networks:
   traefik-public:
