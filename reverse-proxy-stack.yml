@@ -56,8 +56,8 @@ services:
       - --providers.swarm.exposedbydefault=false
       - --providers.swarm.network=traefik-public
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
-      - --entryPoints.web.address=:80
-      - --entryPoints.websecure.address=:443
+      - --entryPoints.http.address=:80
+      - --entryPoints.https.address=:443
       - --certificatesresolvers.le.acme.storage=/certificates/acme.json
       - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
       - --certificatesresolvers.le.acme.dnschallenge=true
