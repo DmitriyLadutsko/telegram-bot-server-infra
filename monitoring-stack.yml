@@ -13,13 +13,13 @@ networks:
 services:
   grafana:
     image: grafana/grafana:latest
-    depends_on:
-      - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
 #      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     env_file:
       - ./monitoring/grafana/config.monitoring
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana:${DOMAIN_NAME}
     networks:
       - traefik-public
       - monitor
@@ -27,15 +27,15 @@ services:
       placement:
         constraints:
           - node.role == manager
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      - "traefik.constraint-label=traefik-public"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
 
-      - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.grafana.entrypoints=https"
-      - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+        - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.grafana.entrypoints=https"
+        - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
 #  prometheus:
 #    image: prom/prometheus:latest
