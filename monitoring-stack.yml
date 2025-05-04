@@ -1,13 +1,13 @@
 version: '3.8'
 
 volumes:
-  prometheus_data:
+#  prometheus_data:
   grafana_data:
 
 networks:
   monitor:
     external: true
-  traefik:
+  traefik-public:
     external: true
 
 services:
@@ -17,11 +17,11 @@ services:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+#      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
     env_file:
       - ./monitoring/grafana/config.monitoring
     networks:
-      - traefik
+      - traefik-public
       - monitor
     deploy:
       placement:
@@ -29,46 +29,49 @@ services:
           - node.role == manager
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.constraint-label=traefik-public"
+
       - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.entrypoints=https"
       - "traefik.http.routers.grafana.tls.certresolver=cloudflare"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - prometheus_data:/prometheus
-      - ./monitoring/prometheus:/etc/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    networks:
-      - traefik
-      - monitor
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.prometheus.entrypoints=websecure"
-      - "traefik.http.routers.prometheus.tls.certresolver=cloudflare"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-
-  node-exporter:
-    image: prom/node-exporter:latest
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.rootfs=/rootfs'
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-    networks:
-      - monitor
-    deploy:
-      mode: global
-      restart_policy:
-        condition: on-failure
+#  prometheus:
+#    image: prom/prometheus:latest
+#    volumes:
+#      - prometheus_data:/prometheus
+#      - ./monitoring/prometheus:/etc/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#      - '--storage.tsdb.path=/prometheus'
+#    networks:
+#      - traefik
+#      - monitor
+#    deploy:
+#      placement:
+#        constraints:
+#          - node.role == manager
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN_NAME}`)"
+#      - "traefik.http.routers.prometheus.entrypoints=websecure"
+#      - "traefik.http.routers.prometheus.tls.certresolver=cloudflare"
+#      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+#
+#  node-exporter:
+#    image: prom/node-exporter:latest
+#    volumes:
+#      - /proc:/host/proc:ro
+#      - /sys:/host/sys:ro
+#      - /:/rootfs:ro
+#    command:
+#      - '--path.rootfs=/rootfs'
+#      - '--path.procfs=/host/proc'
+#      - '--path.sysfs=/host/sys'
+#    networks:
+#      - monitor
+#    deploy:
+#      mode: global
+#      restart_policy:
+#        condition: on-failure
