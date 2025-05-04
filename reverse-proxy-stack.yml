@@ -12,7 +12,7 @@ services:
         mode: host
 
       # traefik ui
-      - '9004:9004'
+#      - '9004:9004'
 
     volumes:
       # So that Traefik can listen to the Docker events
@@ -36,16 +36,16 @@ services:
 
         # Redirect HTTP to HTTPS
         - traefik.http.routers.traefik-public-http.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
-        - traefik.http.routers.traefik-public-http.entrypoints=traefik-ui
+        - traefik.http.routers.traefik-public-http.entrypoints=http
         - traefik.http.routers.traefik-public-http.middlewares=https-redirect
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
         # HTTPS Traefik Dashboard with auth
         - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
-        - traefik.http.routers.traefik-public-https.entrypoints=traefik-ui
+        - traefik.http.routers.traefik-public-https.entrypoints=https
         - traefik.http.routers.traefik-public-https.service=api@internal
-        - traefik.http.routers.traefik-public-https.tls=true
+#        - traefik.http.routers.traefik-public-https.tls=true
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
         - traefik.http.routers.traefik-public-https.middlewares=admin-auth
 
@@ -64,17 +64,17 @@ services:
       - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       - --entryPoints.http.address=:80
       - --entryPoints.https.address=:443
-      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
-      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
       - --certificatesresolvers.le.acme.dnschallenge=true
       - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
       - --accesslog.bufferingsize=100
       - --accesslog.filepath=/var/log/traefik/traefik-access.log
       - --log
       - --api
 
       # SMDM entrypoints additional services
-      - --entrypoints.traefik-ui.address=:9004
+#      - --entrypoints.traefik-ui.address=:9004
 
       - --metrics.prometheus=true
       - --metrics.prometheus.addEntryPointsLabels=true
@@ -102,7 +102,7 @@ services:
         - "traefik.http.routers.whoami.middlewares=https-redirect"
         - "traefik.http.routers.whoami-https.rule=Host(`whoami.${DOMAIN_NAME}`)"
         - "traefik.http.routers.whoami-https.entrypoints=https"
-        - "traefik.http.routers.whoami-https.tls=true"
+#        - "traefik.http.routers.whoami-https.tls=true"
         - "traefik.http.routers.whoami-https.tls.certresolver=le"
 
 networks:
