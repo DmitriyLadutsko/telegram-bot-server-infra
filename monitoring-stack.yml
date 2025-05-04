@@ -61,20 +61,20 @@ services:
         - "traefik.http.routers.prometheus.entrypoints=https"
         - "traefik.http.routers.prometheus.tls.certresolver=le"
         - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-#
-#  node-exporter:
-#    image: prom/node-exporter:latest
-#    volumes:
-#      - /proc:/host/proc:ro
-#      - /sys:/host/sys:ro
-#      - /:/rootfs:ro
-#    command:
-#      - '--path.rootfs=/rootfs'
-#      - '--path.procfs=/host/proc'
-#      - '--path.sysfs=/host/sys'
-#    networks:
-#      - monitor
-#    deploy:
-#      mode: global
-#      restart_policy:
-#        condition: on-failure
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.rootfs=/rootfs'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+    networks:
+      - monitor
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
