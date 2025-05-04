@@ -19,7 +19,7 @@ services:
     env_file:
       - ./monitoring/grafana/config.monitoring
     environment:
-      - GF_SERVER_ROOT_URL=https://grafana:${DOMAIN_NAME}
+      - GF_SERVER_ROOT_URL=https://grafana.${DOMAIN_NAME}
     networks:
       - traefik-public
       - monitor
