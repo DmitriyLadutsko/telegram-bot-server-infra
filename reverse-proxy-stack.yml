@@ -42,7 +42,7 @@ services:
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
 
         # HTTPS Traefik Dashboard with auth
-        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`, `www.traefik.${DOMAIN_NAME?Variable not set}`)
+        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN_NAME?Variable not set}`)
         - traefik.http.routers.traefik-public-https.entrypoints=https
         - traefik.http.routers.traefik-public-https.service=api@internal
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
