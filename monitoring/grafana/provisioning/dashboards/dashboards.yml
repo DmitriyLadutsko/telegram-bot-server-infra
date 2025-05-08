@@ -19,6 +19,15 @@ providers:
     options:
       path: /etc/grafana/provisioning/dashboards/bots
 
+  - name: 'Telegram Bot Monitoring'
+    orgId: 1
+    folder: Bots
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/bots/telegram-bot-otel.json
+
 #  - name: Traffic
 #    orgId: 1
 #    folder: Traffic

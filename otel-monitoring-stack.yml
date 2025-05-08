@@ -1,0 +1,48 @@
+version: '3.9'
+
+volumes:
+  grafana_data:
+
+networks:
+  otel-monitor:
+    external: true
+  traefik-public:
+    external: true
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./monitoring/grafana/config.monitoring
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana.${DOMAIN_NAME}
+    networks:
+      - traefik-public
+      - otel-monitor
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+
+        - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)"
+        - "traefik.http.routers.grafana.entrypoints=https"
+        - "traefik.http.routers.grafana.tls.certresolver=le"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: [ "--config=/etc/otel-config.yml" ]
+    ports:
+      - "4317:4317"      # OTLP gRPC
+      - "8888:8888"      # Prometheus metrics
+    volumes:
+      - ./monitoring/otel/otel-collector-config.yml:/etc/otel-config.yml
+    networks:
+      - otel-monitor

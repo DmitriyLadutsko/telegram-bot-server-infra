@@ -1,0 +1,142 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Telegram Bot Monitoring",
+    "tags": ["telegram", "bot", "opentelemetry"],
+    "timezone": "browser",
+    "schemaVersion": 37,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+      {
+        "type": "row",
+        "title": "General Metrics",
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+      },
+      {
+        "type": "stat",
+        "title": "Total Requests",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_requests_seconds_count[1m]))",
+            "legendFormat": "requests",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Request Duration (Avg)",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "avg(http_server_requests_seconds_sum / http_server_requests_seconds_count)",
+            "legendFormat": "avg duration",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Errors",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m]))",
+            "legendFormat": "errors",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": { "mode": "critical" }
+          }
+        }
+      },
+      {
+        "type": "row",
+        "title": "Telegram API Metrics",
+        "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
+      },
+      {
+        "type": "timeseries",
+        "title": "Messages Received",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "sum(rate(otel_span_count{service_name=\"telegram-bot\", span_name=\"onUpdateReceived\"}[1m]))",
+            "legendFormat": "messages",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "type": "timeseries",
+        "title": "Processing Time",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "rate(otel_trace_duration_seconds_sum{service_name=\"telegram-bot\"}[1m]) / rate(otel_trace_duration_seconds_count{service_name=\"telegram-bot\"}[1m])",
+            "legendFormat": "avg duration",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "type": "row",
+        "title": "Tracing Metrics",
+        "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 }
+      },
+      {
+        "type": "timeseries",
+        "title": "Active Spans",
+        "datasource": "Prometheus",
+        "gridPos": { "x": 0, "y": 13, "w": 24, "h": 6 },
+        "targets": [
+          {
+            "expr": "sum(otel_span_count{service_name=\"telegram-bot\"})",
+            "legendFormat": "active spans",
+            "interval": ""
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      }
+    ]
+  }
+}
