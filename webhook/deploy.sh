@@ -50,9 +50,40 @@ done
 
 echo "✅ Pulled image: $IMAGE" >> "$LOG_FILE"
 
-docker-compose -f "${APP_DIR}/docker-compose.yml" pull "$BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE" 2>&1
-docker-compose -f "${APP_DIR}/docker-compose.yml" up -d "$BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE" 2>&1
-docker cp "$CONTAINER_NAME":/app/VERSION "${APP_DIR}/bots/${BOT_DOCKER_SERVICE_NAME}/VERSION" >> "$LOG_FILE" 2>&1
+# Detect compose or swarm deployment method
+echo "[$(date)] 🔍 Detecting deployment method..." >> "$LOG_FILE"
+
+if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+  DEPLOY_MODE="compose"
+elif docker service ls --format '{{.Name}}' | grep -q "^${REPOSITORY_NAME}_${BOT_DOCKER_SERVICE_NAME}$"; then
+  DEPLOY_MODE="swarm"
+else
+  echo "❌ Could not determine deployment method for $BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE"
+  exit 1
+fi
+
+echo "[$(date)] 🧭 Detected deploy mode: $DEPLOY_MODE" >> "$LOG_FILE"
+
+if [ "$DEPLOY_MODE" = "compose" ]; then
+  docker compose -f "${APP_DIR}/docker-compose.yml" pull "$BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE" 2>&1
+  docker compose -f "${APP_DIR}/docker-compose.yml" up -d "$BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE" 2>&1
+elif [ "$DEPLOY_MODE" = "swarm" ]; then
+  docker service update \
+    --force \
+    --image "$IMAGE" \
+    "${REPOSITORY_NAME}_${BOT_DOCKER_SERVICE_NAME}" >> "$LOG_FILE" 2>&1
+fi
+
+if [ "$DEPLOY_MODE" = "swarm" ]; then
+  SERVICE_CONTAINER=$(docker ps --filter "name=${REPOSITORY_NAME}_${BOT_DOCKER_SERVICE_NAME}" --format "{{.ID}}" | head -n 1)
+  if [ -n "$SERVICE_CONTAINER" ]; then
+    docker cp "$SERVICE_CONTAINER":/app/VERSION "${APP_DIR}/bots/${BOT_DOCKER_SERVICE_NAME}/VERSION" >> "$LOG_FILE" 2>&1
+  else
+    echo "❌ Could not find container for Swarm service $REPOSITORY_NAME_$BOT_DOCKER_SERVICE_NAME" >> "$LOG_FILE"
+  fi
+else
+  docker cp "$CONTAINER_NAME":/app/VERSION "${APP_DIR}/bots/${BOT_DOCKER_SERVICE_NAME}/VERSION" >> "$LOG_FILE" 2>&1
+fi
 
 if docker ps -a --format '{{.Names}}' | grep -q '^nginx-proxy$'; then
   docker restart nginx-proxy >> "$LOG_FILE" 2>&1
