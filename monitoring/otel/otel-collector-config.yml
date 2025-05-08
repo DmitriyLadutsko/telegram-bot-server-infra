@@ -5,7 +5,7 @@ receivers:
       http:
 
 exporters:
-  logging:
+  debug:
     loglevel: info
   prometheus:
     endpoint: "0.0.0.0:8888"
