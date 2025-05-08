@@ -1,5 +1,18 @@
 version: '3.8'
 
+volumes:
+  traefik-public-certificates:
+
+networks:
+  traefik-public:
+    external: true
+
+secrets:
+  cloudflare_api_token:
+    external: true
+  traefik_basic_auth:
+    external: true
+
 services:
   traefik:
     image: traefik:v3.3
@@ -32,7 +45,7 @@ services:
           - node.labels.traefik-public.traefik-public-certificates == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
@@ -68,6 +81,7 @@ services:
       - "--accesslog.bufferingsize=100"
       - "--accesslog.filepath=/var/log/traefik/traefik-access.log"
       - "--log"
+      - "--log.level=DEBUG"
       - "--api"
 #      - "--api.insecure=true"
 
@@ -95,7 +109,7 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.swarm.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
 
         - "traefik.http.routers.whoami-https.rule=Host(`whoami.${DOMAIN_NAME}`)"
@@ -103,16 +117,3 @@ services:
         - "traefik.http.routers.whoami-https.entrypoints=https"
         - "traefik.http.routers.whoami-https.tls.certresolver=le"
         - "traefik.http.services.whoami-https.loadbalancer.server.port=80"
-
-networks:
-  traefik-public:
-    external: true
-
-volumes:
-  traefik-public-certificates:
-
-secrets:
-  cloudflare_api_token:
-    external: true
-  traefik_basic_auth:
-    external: true
