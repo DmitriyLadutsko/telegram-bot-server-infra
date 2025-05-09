@@ -14,7 +14,7 @@ service:
   pipelines:
     traces:
       receivers: [ otlp ]
-      exporters: [ debug, prometheus ]
+      exporters: [ debug ]
     metrics:
       receivers: [ otlp ]
       exporters: [ debug, prometheus ]
