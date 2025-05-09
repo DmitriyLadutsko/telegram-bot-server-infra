@@ -46,3 +46,8 @@ services:
       - ./monitoring/otel/otel-collector-config.yml:/etc/otel-config.yml
     networks:
       - otel-monitor
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
