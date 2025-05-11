@@ -37,10 +37,11 @@ services:
         - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
   otel-collector:
-    image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otel-config.yml" ]
     ports:
-      - "4317:4317"      # OTLP gRPC
+#      - "4317:4317"      # OTLP gRPC
+      - "4318:4318"      # OTLP http receiver
       - "8888:8888"      # Prometheus metrics
     volumes:
       - ./monitoring/otel/otel-collector-config.yml:/etc/otel-config.yml
