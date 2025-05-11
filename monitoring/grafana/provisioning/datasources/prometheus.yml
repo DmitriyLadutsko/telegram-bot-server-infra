@@ -16,6 +16,7 @@ datasources:
   - name: OpenTelemetry Collector
     type: prometheus
     access: proxy
+    orgId: 1
     url: http://otel-collector:8888
     isDefault: true
     editable: true
