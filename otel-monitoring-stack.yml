@@ -2,6 +2,9 @@ version: '3.9'
 
 volumes:
   grafana_data:
+  tempo_data:
+  loki_data:
+  prometheus_data:
 
 networks:
   otel-monitor:
@@ -42,7 +45,7 @@ services:
     ports:
       - "4317:4317"      # OTLP gRPC
       - "4318:4318"      # OTLP http receiver
-      - "8888:8888"      # Prometheus metrics
+      - "8889:8889"      # Prometheus metrics
     volumes:
       - ./monitoring/otel/otel-collector-config.yml:/etc/otel-config.yml
     networks:
@@ -52,3 +55,34 @@ services:
       restart_policy:
         condition: on-failure
         max_attempts: 3
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - tempo_data:/tmp/tempo
+      - ./monitoring/tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    networks:
+      - otel-monitor
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - otel-monitor
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - otel-monitor
