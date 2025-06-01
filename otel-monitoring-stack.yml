@@ -64,7 +64,6 @@ services:
       - ./monitoring/tempo/tempo.yaml:/etc/tempo.yaml
     ports:
       - "3200:3200"
-      - "4317:4317"
     networks:
       - otel-monitor
 
