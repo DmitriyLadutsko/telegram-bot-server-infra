@@ -41,11 +41,12 @@ service:
     traces:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ debug ]
+      exporters: [ debug, otlp/tempo ]
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]
       exporters: [ debug, prometheus ]
     logs:
       receivers: [ otlp ]
+      processors: [ batch ]
       exporters: [ debug ]
