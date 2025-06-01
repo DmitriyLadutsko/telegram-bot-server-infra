@@ -58,7 +58,7 @@ services:
 
   tempo:
     image: grafana/tempo:latest
-    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    command: [ "-config.file=/etc/tempo/tempo.yml" ]
     volumes:
       - tempo_data:/tmp/tempo
       - ./monitoring/tempo:/etc/tempo
