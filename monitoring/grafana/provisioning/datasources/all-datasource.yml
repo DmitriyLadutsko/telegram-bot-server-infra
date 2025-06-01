@@ -1,0 +1,44 @@
+apiVersion: 1
+
+deleteDatasources:
+  - uid: prometheus
+  - uid: tempo
+  - uid: loki
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: 'loki'
+        filterByTraceID: true
+        filterBySpanID: false
+        tags:
+          - 'job'
+          - 'instance'
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+      tracesToMetrics:
+        datasourceUid: 'prometheus'
+        tags: ['service.name']
+        queries:
+          - name: 'Rate'
+            query: 'rate(http_server_requests_seconds_count{service_name="$service"}[1m])'
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    uid: 'loki'  # нужно для tracesToLogs
+    jsonData:
+      maxLines: 1000
