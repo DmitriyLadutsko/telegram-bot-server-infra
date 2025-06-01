@@ -22,7 +22,3 @@ storage:
     backend: local
     local:
       path: /var/tempo/traces
-
-overrides:
-  metrics_generator:
-    enabled: true
