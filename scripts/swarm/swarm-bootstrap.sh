@@ -29,7 +29,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # === Pre-init очистка
-$SWARM_SCRIPTS_DIR/pre-init-cleanup.sh
+#$SWARM_SCRIPTS_DIR/pre-init-cleanup.sh
 
 # === Проверка/инициализация swarm
 if ! docker info | grep -q "Swarm: active"; then
