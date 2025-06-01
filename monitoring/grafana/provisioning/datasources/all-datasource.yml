@@ -25,7 +25,7 @@ datasources:
     url: http://tempo:3200
     jsonData:
       tracesToLogsV2:
-        datasourceUid: 'loki'
+        datasourceUid: loki
         filterByTraceID: true
         filterBySpanID: false
         tags:
@@ -45,6 +45,10 @@ datasources:
     orgId: 1
     access: proxy
     url: http://loki:3100
-    uid: 'loki'  # нужно для tracesToLogs
+    uid: loki  # нужно для tracesToLogs
     jsonData:
       maxLines: 1000
+      derivedFields:
+        - name: traceID
+          matcherRegex: 'trace_id=(\w+)'
+          datasourceUid: tempo
