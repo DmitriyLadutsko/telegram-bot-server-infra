@@ -18,7 +18,6 @@ exporters:
     verbosity: detailed
   otlp/tempo:
     endpoint: "tempo:4317"
-    compression: on
     tls:
       insecure: true
 
