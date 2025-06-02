@@ -19,9 +19,13 @@ compactor:
 
 
 metrics_generator:
-  enabled: true
+  registry:
+    collection_interval: 30s
   storage:
     path: /var/tempo/generator/wal
+  processors:
+    - span_metrics
+    - service_graphs
 
 storage:
   trace:
