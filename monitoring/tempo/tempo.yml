@@ -23,12 +23,19 @@ metrics_generator:
     collection_interval: 30s
   storage:
     path: /var/tempo/generator/wal
-  processors:
-    - span_metrics
-    - service_graphs
+#  processors:
+#    - span_metrics
+#    - service_graphs
 
 storage:
   trace:
     backend: local
     local:
       path: /var/tempo/traces
+
+overrides:
+  default:
+    metrics_generator:
+      processors:
+        - span_metrics
+        - service_graphs
