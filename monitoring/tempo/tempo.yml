@@ -1,13 +1,25 @@
+stream_over_http_enabled: true
 server:
   http_listen_port: 3200
 #  grpc_listen_port: 4317
+  log_level: info
+
+query_frontend:
+  search:
+    duration_slo: 5s
+    throughput_bytes_slo: 1.073741824e+09
+    metadata_slo:
+      duration_slo: 5s
+      throughput_bytes_slo: 1.073741824e+09
+  trace_by_id:
+    duration_slo: 5s
 
 distributor:
   receivers:
     otlp:
       protocols:
         grpc:
-        http:
+          endpoint: "tempo:4317"
 
 ingester:
   trace_idle_period: 10s
@@ -23,19 +35,22 @@ metrics_generator:
     collection_interval: 30s
   storage:
     path: /var/tempo/generator/wal
-#  processors:
-#    - span_metrics
-#    - service_graphs
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  traces_storage:
+    path: /var/tempo/generator/traces
 
 storage:
   trace:
     backend: local
+    wal:
+      path: /var/tempo/wal
     local:
       path: /var/tempo/traces
 
 overrides:
-  default:
+  defaults:
     metrics_generator:
-      processors:
-        - span_metrics
-        - service_graphs
+      processors: [service-graphs, span-metrics, local-blocks] # enables metrics generator
+      generate_native_histograms: both

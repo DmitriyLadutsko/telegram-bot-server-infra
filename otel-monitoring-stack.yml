@@ -17,7 +17,7 @@ services:
     image: grafana/grafana:latest
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning/datasources/all-datasources.yml:/etc/grafana/provisioning/datasources/all-datasources.yml
     env_file:
       - ./monitoring/grafana/config.monitoring
     environment:
@@ -58,12 +58,13 @@ services:
 
   tempo:
     image: grafana/tempo:latest
-    command: [ "-config.file=/etc/tempo/tempo.yml" ]
+    entrypoint: [ "/etc/tempo/tempo-entrypoint.sh" ]
     volumes:
       - tempo_data:/var/tempo
-      - ./monitoring/tempo:/etc/tempo
+      - ./monitoring/tempo/tempo.yml:/etc/tempo/tempo.yml
     ports:
       - "3200:3200"
+      - "4317:4317"  # OTLP gRPC for traces
     networks:
       - otel-monitor
 
@@ -78,9 +79,14 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
     volumes:
       - prometheus_data:/prometheus
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus.yml
     ports:
       - "9090:9090"
     networks:

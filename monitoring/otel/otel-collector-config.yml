@@ -16,7 +16,7 @@ exporters:
     namespace: "promeotel"
   debug:
     verbosity: detailed
-  otlp/tempo:
+  otlp:
     endpoint: "tempo:4317"
     tls:
       insecure: true
@@ -41,7 +41,7 @@ service:
     traces:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ debug, otlp/tempo ]
+      exporters: [ debug, otlp ]
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]
