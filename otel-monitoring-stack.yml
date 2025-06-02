@@ -60,7 +60,7 @@ services:
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo/tempo.yml" ]
     volumes:
-      - tempo_data:/tmp/tempo
+      - tempo_data:/var/tempo
       - ./monitoring/tempo:/etc/tempo
     ports:
       - "3200:3200"

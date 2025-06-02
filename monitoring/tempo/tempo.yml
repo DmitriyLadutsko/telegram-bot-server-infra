@@ -17,6 +17,12 @@ compactor:
   compaction:
     block_retention: 1h
 
+
+metrics_generator:
+  enabled: true
+  storage:
+    path: /var/tempo/generator/wal
+
 storage:
   trace:
     backend: local
