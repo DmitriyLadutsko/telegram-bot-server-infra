@@ -58,7 +58,7 @@ services:
 
   tempo:
     image: grafana/tempo:latest
-    entrypoint: [ "/etc/tempo/tempo-entrypoint.sh" ]
+    command: [ "-config.file=/etc/tempo/tempo.yml" ]
     volumes:
       - tempo_data:/var/tempo
       - ./monitoring/tempo:/etc/tempo
