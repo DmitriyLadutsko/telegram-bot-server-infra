@@ -17,7 +17,7 @@ exporters:
   debug:
     verbosity: detailed
   otlp:
-    endpoint: "tempo:4317"
+    endpoint: "tempo:55680"
     tls:
       insecure: true
 

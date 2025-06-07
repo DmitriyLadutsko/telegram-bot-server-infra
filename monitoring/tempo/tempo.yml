@@ -19,7 +19,7 @@ distributor:
     otlp:
       protocols:
         grpc:
-          endpoint: "tempo:4317"
+          endpoint: "0.0.0.0:55680"
 
 ingester:
   trace_idle_period: 10s
