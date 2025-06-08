@@ -50,6 +50,7 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: [ "--config=/etc/otel-config.yml" ]
+    user: 0:0
     ports:
 #      - "4317:4317"      # OTLP gRPC
       - "4318:4318"      # OTLP http receiver
