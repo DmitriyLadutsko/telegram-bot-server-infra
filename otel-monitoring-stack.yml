@@ -1,5 +1,12 @@
 version: '3.9'
 
+x-default-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+    tag: "{{.Name}}"
+
 volumes:
   grafana_data:
   tempo_data:
@@ -38,6 +45,7 @@ services:
         - "traefik.http.routers.grafana.entrypoints=https"
         - "traefik.http.routers.grafana.tls.certresolver=le"
         - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    logging: *logging
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -55,6 +63,7 @@ services:
       restart_policy:
         condition: on-failure
         max_attempts: 3
+    logging: *logging
 
   tempo:
     image: grafana/tempo:latest
@@ -67,6 +76,7 @@ services:
       - "55680:55680"  # OTLP gRPC for traces
     networks:
       - otel-monitor
+    logging: *logging
 
   loki:
     image: grafana/loki:latest
@@ -76,6 +86,7 @@ services:
       - "3100:3100"
     networks:
       - otel-monitor
+    logging: *logging
 
   prometheus:
     image: prom/prometheus:latest
@@ -91,3 +102,4 @@ services:
       - "9090:9090"
     networks:
       - otel-monitor
+    logging: *logging
