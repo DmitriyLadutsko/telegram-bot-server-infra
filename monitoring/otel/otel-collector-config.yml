@@ -10,11 +10,11 @@ processors:
   resource:
     attributes:
       - key: service.name
-        from_attribute: "service.name"
         action: insert
-      - key: loki.attribute.labels
-        value: "service.name,log.level"
+        value: "demo-bot"
+      - key: loki.resource.labels
         action: insert
+        value: "service.name"
   batch:
     { }
 
@@ -26,11 +26,6 @@ exporters:
     verbosity: detailed
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-    labels:
-      resource:
-        - service.name
-      attributes:
-        - log.level
   otlp:
     endpoint: "tempo:55680"
     tls:
