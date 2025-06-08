@@ -55,6 +55,8 @@ services:
       - "4318:4318"      # OTLP http receiver
       - "8889:8889"      # Prometheus metrics
     volumes:
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./monitoring/otel/otel-collector-config.yml:/etc/otel-config.yml
     networks:
       - otel-monitor
