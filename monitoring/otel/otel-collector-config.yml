@@ -10,7 +10,6 @@ receivers:
   hostmetrics:
     root_path: /hostfs
     scrapers:
-      uptime:
       cpu:
         metrics:
           system.cpu.utilization:
